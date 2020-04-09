@@ -61,7 +61,7 @@ public class ProductActivations {
         Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            this.performPostCall("http://api.productactivations.com/api/v1/geofences/register_device", deviceData)
+            this.performPostCall("http://api.productactivations.com/api/v1/geofences/register_device", deviceData);
         }
     }
 
