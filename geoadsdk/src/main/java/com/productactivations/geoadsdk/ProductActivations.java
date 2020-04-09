@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -60,6 +61,7 @@ public class ProductActivations {
 
         Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
 
+        Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             this.performPostCall("http://api.productactivations.com/api/v1/geofences/register_device", deviceData);
         }
@@ -121,10 +123,12 @@ public class ProductActivations {
                 }
                 System.out.println(response.toString());
                 resp = response.toString();
+
+                Log.d("Result from posting ", resp);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("Error posting ", e.toString());
         }
 
         return resp;
