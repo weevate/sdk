@@ -63,7 +63,7 @@ public class ProductActivations {
 
         Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            this.performPostCall("http://api.productactivations.com/api/v1/geofences/register_device", deviceData);
+            this.performPostCall("https://api.productactivations.com/api/v1/geofences/register_device", deviceData);
         }
     }
 
