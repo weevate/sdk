@@ -64,19 +64,33 @@ public class ProductActivations {
 
         Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
 
-            Handler h = new Handler();
 
-            Runnable run  = new Runnable() {
+            final Handler mHandler = new Handler();
+
+            new Thread(new Runnable() {
                 @Override
-                public void run() {
-                    performPostCall("https://api.productactivations.com/api/v1/geofences/register_device", deviceData);
+                public void run () {
+                    // Perform long-running task here
+                    // (like audio buffering).
+                    // you may want to update some progress
+                    // bar every second, so use handler:
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run () {
+                            // make operation on UI - on example
+                            // on progress bar.
+                            performPostCall(url, deviceData);
+                        }
+                    });
                 }
-            };
+            }).start();
 
-            h.post(run);
 
-            }
+
+
+        }
         else{
 
             Log.d("kdkd", "Call not made");
