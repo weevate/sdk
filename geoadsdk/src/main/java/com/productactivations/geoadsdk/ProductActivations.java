@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -57,13 +58,28 @@ public class ProductActivations {
                 Settings.Secure.ANDROID_ID);
 
         String device_id = android_id;
-        String deviceData = "{\"Platform\":\"android\", \"FcmToken\":\""+fcm_token+"\", \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+        final String deviceData = "{\"Platform\":\"android\", \"FcmToken\":\""+fcm_token+"\", \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
         Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
 
         Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            this.performPostCall("https://api.productactivations.com/api/v1/geofences/register_device", deviceData);
+
+            Handler h = new Handler();
+
+            Runnable run  = new Runnable() {
+                @Override
+                public void run() {
+                    performPostCall("https://api.productactivations.com/api/v1/geofences/register_device", deviceData);
+                }
+            };
+
+            h.post(run);
+
+            }
+        else{
+
+            Log.d("kdkd", "Call not made");
         }
     }
 
