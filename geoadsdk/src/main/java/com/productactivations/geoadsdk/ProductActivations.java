@@ -6,6 +6,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.Settings;
@@ -60,33 +61,21 @@ public class ProductActivations {
         String device_id = android_id;
         final String deviceData = "{\"Platform\":\"android\", \"FcmToken\":\""+fcm_token+"\", \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
-        Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
+      //  Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
 
         Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
 
 
-            final Handler mHandler = new Handler();
+            new AsyncTask<String, String, String>(){
 
-            new Thread(new Runnable() {
                 @Override
-                public void run () {
-                    // Perform long-running task here
-                    // (like audio buffering).
-                    // you may want to update some progress
-                    // bar every second, so use handler:
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run () {
-                            // make operation on UI - on example
-                            // on progress bar.
-                            performPostCall(url, deviceData);
-                        }
-                    });
+                protected String doInBackground(String... strings) {
+                    performPostCall(url, deviceData);
+                    return null;
                 }
-            }).start();
-
+            }.execute("");
 
 
 
@@ -120,6 +109,8 @@ public class ProductActivations {
     public String  performPostCall(String requestURL,
                                    String jsonData) {
 
+        Log.d("performing call", "performing call");
+
         URL url;
         String resp = "";
         try {
@@ -135,14 +126,17 @@ public class ProductActivations {
 
 
 
-            try(OutputStream os = conn.getOutputStream()) {
-                byte[] input = jsonData.getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
 
 
             conn.setDoInput(true);
             conn.setDoOutput(true);
+
+
+
+            try(OutputStream os = conn.getOutputStream()) {
+                byte[] input = jsonData.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
 
             try(BufferedReader br = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), "utf-8"))) {
@@ -163,7 +157,6 @@ public class ProductActivations {
 
         return resp;
     }
-
 
 
     public void start(){
