@@ -7,6 +7,8 @@ import android.content.Intent;
         @Override
         public void onReceive(Context context, Intent intent)
         {
+
+            EasyLogger.log("REceived alarm");
             Context oAppContext = context.getApplicationContext();
 
             if (oAppContext == null) {

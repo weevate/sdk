@@ -94,9 +94,13 @@ public class ProductActivations {
     public void onPermissionGranted(){
 
 
-        Toast.makeText(appContext.getApplicationContext(), "Started tracking", Toast.LENGTH_LONG).show();
+            EasyLogger.log("Permission graned ");
 
+            Intent i2 = new Intent(appContext, ActivationService.class);
 
+            appContext.startService(i2);
+
+            EasyLogger.log("Started service" );
             AlarmManager am = (AlarmManager)this.appContext.getSystemService(ALARM_SERVICE);
             Intent i = new Intent(this.appContext, AlarmReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -104,8 +108,9 @@ public class ProductActivations {
             Calendar t = Calendar.getInstance();
             t.setTimeInMillis(System.currentTimeMillis());
 
-            int interval =  10000;
+            int interval =  20000;
             am.setRepeating(AlarmManager.RTC_WAKEUP, t.getTimeInMillis(), interval, pendingIntent);
+            EasyLogger.log("Started alarm");
 
         }
 
