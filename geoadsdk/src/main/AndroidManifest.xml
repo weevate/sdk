@@ -2,9 +2,7 @@
     package="com.productactivations.geoadsdk" >
 
     <application>
-        <service android:name=".ActivationService"
-            android:exported="true"
-            android:enabld="true"/>
+        <service android:name=".ActivationService" />
 
         <receiver android:name=".AlarmReceiver"/>
     </application>
