@@ -8,7 +8,7 @@ import android.content.Intent;
         public void onReceive(Context context, Intent intent)
         {
 
-            EasyLogger.log("REceived alarm");
+            EasyLogger.toast(context, "REceived alaram");
             Context oAppContext = context.getApplicationContext();
 
             if (oAppContext == null) {

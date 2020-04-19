@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -33,6 +35,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
 
 import static android.provider.Telephony.Mms.Part.FILENAME;
 
@@ -69,8 +72,29 @@ public class ActivationService extends Service {
 
                         EasyLogger.toast(ActivationService.this,  + mLastLocation.getLatitude() + "  long: "+ mLastLocation.getLongitude());
 
-                        EasyLogger.log(" Gotten user loation " + mLastLocation.getLatitude() + "  long: "+ mLastLocation.getLongitude());
+                        String json = "{ \n" +
+                                "\"Latitude\":\""+mLastLocation.getLatitude()+"\",\n" +
+                                "\"Longitude\":\""+mLastLocation.getLongitude()+"\",\n" +
+                                "\"DeviceId\":\"484848484848\"\n" +
+                                "}";
 
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            String result = performPostCall("https://localhost:44394/api/v1/geofences/get_geofences", json);
+                            EasyLogger.toast(ActivationService.this, "Result is " + result);
+
+                            try{
+                                Gson gson = new Gson();
+                                Map obj = gson.fromJson(result, Map.class);
+                                Location[] data = gson.fromJson((String) obj.get("data"), Location[].class);
+                                EasyLogger.toast(ActivationService.this, data.length + " is location length  " + data[1].toString());
+
+                            }
+                            catch(Exception es){
+
+                            }
+
+
+                        }
                     }
                 },
                 Looper.myLooper()

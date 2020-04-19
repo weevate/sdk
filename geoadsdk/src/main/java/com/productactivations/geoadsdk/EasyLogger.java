@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 public class EasyLogger {
 
-    public static String TAG = "Remcred";
+    public static String TAG = "productactivations";
 
 
     public static void log(String message){
