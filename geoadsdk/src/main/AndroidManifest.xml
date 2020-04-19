@@ -1,2 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.productactivations.geoadsdk" />
+    package="com.productactivations.geoadsdk" >
+
+    <application>
+        <service android:name=".ActivationService"
+            android:exported="true"
+            android:enabld="true"/>
+
+        <receiver android:name=".AlarmReceiver"/>
+    </application>
+</manifest>

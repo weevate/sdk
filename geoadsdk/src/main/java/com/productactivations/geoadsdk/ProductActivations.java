@@ -1,10 +1,11 @@
 package com.productactivations.geoadsdk;
-import io.radar.sdk.Radar;
-import io.radar.sdk.RadarTrackingOptions;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -26,10 +27,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import static android.content.Context.ALARM_SERVICE;
 
 public class ProductActivations {
 
@@ -61,7 +65,7 @@ public class ProductActivations {
         String device_id = android_id;
         final String deviceData = "{\"Platform\":\"android\", \"FcmToken\":\""+fcm_token+"\", \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
-      //  Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
+        Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
 
         Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -89,20 +93,23 @@ public class ProductActivations {
 
     public void onPermissionGranted(){
 
-        Radar.initialize("prj_live_pk_4fb9d494fd14401117079572640b88ba67819c73");
-
-        RadarTrackingOptions trackingOptions = new RadarTrackingOptions.Builder()
-                .priority(Radar.RadarTrackingPriority.RESPONSIVENESS) // use EFFICIENCY instead to reduce location update frequency
-                .offline(Radar.RadarTrackingOffline.REPLAY_STOPPED) // use REPLAY_OFF instead to disable offline replay
-                .sync(Radar.RadarTrackingSync.POSSIBLE_STATE_CHANGES) // use ALL instead to sync all location updates
-                .build();
-
-        Radar.startTracking();
-
 
         Toast.makeText(appContext.getApplicationContext(), "Started tracking", Toast.LENGTH_LONG).show();
 
-    }
+
+            AlarmManager am = (AlarmManager)this.appContext.getSystemService(ALARM_SERVICE);
+            Intent i = new Intent(this.appContext, AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Calendar t = Calendar.getInstance();
+            t.setTimeInMillis(System.currentTimeMillis());
+
+            int interval =  10000;
+            am.setRepeating(AlarmManager.RTC_WAKEUP, t.getTimeInMillis(), interval, pendingIntent);
+
+        }
+
+
 
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -161,7 +168,8 @@ public class ProductActivations {
 
     public void start(){
 
-        Radar.startTracking();
+        Intent i = new Intent(this.appContext, ActivationService.class);
+        this.appContext.startService(i);
     }
 
 
