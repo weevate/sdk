@@ -79,7 +79,7 @@ public class ActivationService extends Service {
                                 "}";
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            String result = performPostCall("https://localhost:44394/api/v1/geofences/get_geofences", json);
+                            String result = performPostCall("https://api.productactivations.com/api/v1/geofences/get_geofences", json);
                             EasyLogger.toast(ActivationService.this, "Result is " + result);
 
                             try{
