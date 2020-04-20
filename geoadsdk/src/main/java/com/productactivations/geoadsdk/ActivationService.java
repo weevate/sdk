@@ -26,6 +26,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -79,8 +80,14 @@ public class ActivationService extends Service {
                                 "}";
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            String result = performPostCall("https://api.productactivations.com/api/v1/geofences/get_geofences", json);
-                            EasyLogger.toast(ActivationService.this, "Result is " + result);
+                            String result = "";
+                            try {
+                                result = performPostCall("https://api.productactivations.com/api/v1/geofences/get_geofences", json);
+                                EasyLogger.toast(ActivationService.this, "Result is " + result);
+                            }
+                            catch(Exception e){
+                                Toast.makeText(getApplicationContext(), "Error making request "+e.toString(), Toast.LENGTH_LONG).show();
+                            }
 
                             try{
                                 Gson gson = new Gson();
