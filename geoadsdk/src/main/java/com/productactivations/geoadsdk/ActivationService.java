@@ -90,10 +90,16 @@ public class ActivationService extends Service {
 
                             }
 
+
                             @Override
                             public void onPostExecute(String result){
                                 Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
+
+                                if(result.indexOf("data") > 0 ){
+
+                                    String setupNotification  = setUpNotification(result);
                                 }
+                            }
                         }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -106,17 +112,6 @@ public class ActivationService extends Service {
                                 Toast.makeText(getApplicationContext(), "Error making request "+e.toString(), Toast.LENGTH_LONG).show();
                             }
 
-                            try{
-                                Gson gson = new Gson();
-                                Map obj = gson.fromJson(result, Map.class);
-                                Location[] data = gson.fromJson((String) obj.get("data"), Location[].class);
-                                EasyLogger.toast(ActivationService.this, data.length + " is location length  " + data[1].toString());
-
-                            }
-                            catch(Exception es){
-                                Toast.makeText(getApplicationContext(), "Error parsing json "+es.toString(), Toast.LENGTH_LONG).show();
-
-                            }
 
 
                         }
@@ -130,6 +125,24 @@ public class ActivationService extends Service {
         return Service.START_NOT_STICKY;
     }
 
+
+
+    public String setUpNotification(String result){
+
+
+        Toast.makeText(ActivationService.this," Parsing " , Toast.LENGTH_LONG).show();
+        Gson gson = new Gson();
+        Map obj = gson.fromJson(result, Map.class);
+
+        String data = (String) obj.get("data");
+        Toast.makeText(ActivationService.this,"Gotten data "+ data, Toast.LENGTH_LONG).show();
+
+        Location[] locations = gson.fromJson(data, Location[].class);
+
+        Toast.makeText(ActivationService.this, "Gotten locations " +locations.length + " and notifications " + locations[0].toString(), Toast.LENGTH_LONG).show();
+
+        return "";
+    }
 
 
     class doPostRequest extends AsyncTask<String, String, String> {
