@@ -95,26 +95,13 @@ public class ActivationService extends Service {
                             public void onPostExecute(String result){
                                 Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
-                                if(result.indexOf("data") > 0 ){
+                                if(result!=null && result.indexOf("data") > 0 ){
 
                                     String setupNotification  = setUpNotification(result);
                                 }
                             }
                         }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            String result = "";
-                            try {
-                             //   result = performPostCall("https://api.productactivations.com/api/v1/geofences/get_geofences", json);
-                             //   EasyLogger.toast(ActivationService.this, "Result is " + result);
-                            }
-                            catch(Exception e){
-                                Toast.makeText(getApplicationContext(), "Error making request "+e.toString(), Toast.LENGTH_LONG).show();
-                            }
-
-
-
-                        }
                     }
                 },
                 Looper.myLooper()
@@ -129,18 +116,21 @@ public class ActivationService extends Service {
 
     public String setUpNotification(String result){
 
+        try {
+            Toast.makeText(ActivationService.this, " Parsing ", Toast.LENGTH_LONG).show();
+            Gson gson = new Gson();
+            Map obj = gson.fromJson(result, Map.class);
 
-        Toast.makeText(ActivationService.this," Parsing " , Toast.LENGTH_LONG).show();
-        Gson gson = new Gson();
-        Map obj = gson.fromJson(result, Map.class);
+            String data = (String) obj.get("data");
+            Toast.makeText(ActivationService.this, "Gotten data " + data, Toast.LENGTH_LONG).show();
 
-        String data = (String) obj.get("data");
-        Toast.makeText(ActivationService.this,"Gotten data "+ data, Toast.LENGTH_LONG).show();
+            Location[] locations = gson.fromJson(data, Location[].class);
+            Toast.makeText(ActivationService.this, "Gotten locations " + locations.length + " and notifications " + locations[0].toString(), Toast.LENGTH_LONG).show();
+        }
+        catch(Exception es){
 
-        Location[] locations = gson.fromJson(data, Location[].class);
-
-        Toast.makeText(ActivationService.this, "Gotten locations " +locations.length + " and notifications " + locations[0].toString(), Toast.LENGTH_LONG).show();
-
+            Toast.makeText(getApplicationContext(), "Exception getting location " + es.toString(), Toast.LENGTH_LONG).show();
+        }
         return "";
     }
 
