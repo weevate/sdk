@@ -18,6 +18,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -79,11 +80,27 @@ public class ActivationService extends Service {
                                 "\"DeviceId\":\"484848484848\"\n" +
                                 "}";
 
+
+
+                        new doPostRequest(){
+
+                            @Override
+                            public void onPreExecute(){
+                                Toast.makeText(getApplicationContext(), "About to start ", Toast.LENGTH_LONG).show();
+
+                            }
+
+                            @Override
+                            public void onPostExecute(String result){
+                                Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
+                                }
+                        }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
+
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                             String result = "";
                             try {
-                                result = performPostCall("https://api.productactivations.com/api/v1/geofences/get_geofences", json);
-                                EasyLogger.toast(ActivationService.this, "Result is " + result);
+                             //   result = performPostCall("https://api.productactivations.com/api/v1/geofences/get_geofences", json);
+                             //   EasyLogger.toast(ActivationService.this, "Result is " + result);
                             }
                             catch(Exception e){
                                 Toast.makeText(getApplicationContext(), "Error making request "+e.toString(), Toast.LENGTH_LONG).show();
@@ -97,6 +114,7 @@ public class ActivationService extends Service {
 
                             }
                             catch(Exception es){
+                                Toast.makeText(getApplicationContext(), "Error parsing json "+es.toString(), Toast.LENGTH_LONG).show();
 
                             }
 
@@ -107,7 +125,33 @@ public class ActivationService extends Service {
                 Looper.myLooper()
         );
 
+        Toast.makeText(getApplicationContext(), "returning sticky ", Toast.LENGTH_LONG).show();
+
         return Service.START_NOT_STICKY;
+    }
+
+
+
+    class doPostRequest extends AsyncTask<String, String, String> {
+
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return performPostCall(strings[0], strings[1]);
+            }
+
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(String result){
+
+
+        }
     }
 
 
