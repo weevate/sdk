@@ -13,5 +13,8 @@
         <service android:name=".ActivationService" />
 
         <receiver android:name=".AlarmReceiver"/>
+
+
+        <receiver android:name=".GeofenceBroadcastReceiver"/>
     </application>
 </manifest>

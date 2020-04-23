@@ -1,6 +1,8 @@
 package com.productactivations.geoadsdk;
 
-public class Location {
+import java.util.ArrayList;
+
+public class PLocation {
 
       public   int id;
       public String name;
@@ -9,4 +11,5 @@ public class Location {
       public double radius;
 
       public SdkNotification[] notifications;
+
 }

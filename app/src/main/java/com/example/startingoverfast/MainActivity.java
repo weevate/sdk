@@ -1,17 +1,25 @@
 package com.example.startingoverfast;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.productactivations.geoadsdk.DelayedLogger;
+import com.productactivations.geoadsdk.EasyLogger;
+import com.productactivations.geoadsdk.ProductActivations;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -20,17 +28,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        logsV = findViewById(R.id.log);
+
+        ProductActivations.getInstance(getApplicationContext()).initialize(MainActivity.this, "NO NORE FCM");
+
     }
 
     @Override
@@ -39,6 +41,21 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        int i = 0;
+        for (String s : permissions) {
+
+            boolean granted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
+            Toast.makeText(getApplicationContext(), "Permissions granted " + s + " " + grantResults[i] + " " + String.valueOf(granted), Toast.LENGTH_LONG).show();
+            i++;
+        }
+        ProductActivations.getInstance(getApplicationContext()).onPermissionGranted();
+
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -53,5 +70,32 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    TextView logsV;
+
+    public void loadLogs(View view) {
+
+
+        String[] logs = EasyLogger.getLogs(getApplicationContext());
+        Toast.makeText(getApplicationContext(), "Found " + logs.length + " Logs", Toast.LENGTH_LONG).show();
+        if (logs == null) {
+
+            EasyLogger.log("No logs found ");
+            return;
+        }
+        logsV.setText("\r\n\r\n\r\n\r\n");
+
+        for (int i = logs.length - 1; i >= 0; i--) {
+
+            logsV.setText(logsV.getText().toString() + "\r\n\r\n" + logs[i]);
+
+        }
+
+    }
+
+    public void clearLogs(View view) {
+        EasyLogger.clearLogs(getApplicationContext());
+        loadLogs(null);
     }
 }

@@ -65,7 +65,7 @@ public class ProductActivations {
         String device_id = android_id;
         final String deviceData = "{\"Platform\":\"android\", \"FcmToken\":\""+fcm_token+"\", \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
-        Toast.makeText(appContext.getApplicationContext(), deviceData, Toast.LENGTH_LONG).show();
+        EasyLogger.toast(appContext.getApplicationContext(), deviceData);
 
         Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -108,7 +108,7 @@ public class ProductActivations {
             Calendar t = Calendar.getInstance();
             t.setTimeInMillis(System.currentTimeMillis());
 
-            int interval =  20000;
+            int interval =  60000;
             am.setRepeating(AlarmManager.RTC_WAKEUP, t.getTimeInMillis(), interval, pendingIntent);
             EasyLogger.log("Started alarm");
 
