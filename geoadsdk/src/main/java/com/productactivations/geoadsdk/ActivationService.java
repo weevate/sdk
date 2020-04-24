@@ -211,8 +211,8 @@ public class ActivationService extends Service {
     public boolean inRadius(PLocation geofence, Location currentLocation){
 
         Log.d("calc distance to " + geofence.name ,  geofence.latitude + ", long" + geofence.longitude + " vs " + currentLocation.getLatitude() + ": " + currentLocation.getLongitude());
-         if(geofence.radius < 50){
-            geofence.radius = 50;
+         if(geofence.radius < 100){
+            geofence.radius = 100;
         }
 
         double lat1 = geofence.latitude;
@@ -230,7 +230,7 @@ public class ActivationService extends Service {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         float dist = (float) (earthRadius * c);
 
-        EasyLogger.toast(this, "Current Radius to location is "  + dist + " metres while required: " + geofence.radius);
+        EasyLogger.toast(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
         Log.d("Distance is " , "Dist is " + dist + " vs " + (float) geofence.radius);
         boolean result = dist <= (float) geofence.radius;
 
@@ -239,7 +239,25 @@ public class ActivationService extends Service {
         return result;
     }
 
+
+    String CHANNEL_ID = "ads";
+    String CHANNEL_NAME = "productactivations";
+
+    private void sendNotification(SdkNotification notification){
+        try {
+            new SendNotification(this, notification).execute("");
+        }
+        catch(Exception es){
+
+            EasyLogger.toast(this, es.getMessage());
+        }
+
+    }
+
     public void registerNotifications(ActivationsResponse response,  Location currentLocation){
+
+
+//        sendNotification(response.data[0].notifications[0]);
 
 
         PLocation closest = response.data[0];
@@ -251,7 +269,7 @@ public class ActivationService extends Service {
         }
 
         if(!inRadius(closest, currentLocation)){
-          //  Toast.makeText(this, "Not IN radius", Toast.LENGTH_SHORT).show();
+            //  Toast.makeText(this, "Not IN radius", Toast.LENGTH_SHORT).show();
 
             if(alreadyInGeofence(closest)){
 
@@ -272,14 +290,10 @@ public class ActivationService extends Service {
 
         /*
        ArrayList<Geofence> geofenceList = getGeofences(response);
-
-
         if(geofenceList.size() < 1){
-
             EasyLogger.log("No notifications set");
             return;
         }
-
        geofencingClient.addGeofences(getGeofenceingRequest(geofenceList), getGeofencePendingIntent()).addOnSuccessListener(new Executor() {
            @Override
            public void execute(Runnable command) {
@@ -296,95 +310,19 @@ public class ActivationService extends Service {
                LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
                    Toast.makeText(ActivationService.this, "GPS Provider not avaialeble" + e.toString(), Toast.LENGTH_LONG).show();
-
                }
                if (!manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
                    Toast.makeText(ActivationService.this, "Network provider not avaialeble" + e.toString(), Toast.LENGTH_LONG).show();
-
                }
-
                Toast.makeText(ActivationService.this, "failure adding " + e.toString(), Toast.LENGTH_LONG).show();
            }
        }).addOnCompleteListener(new OnCompleteListener<Void>() {
            @Override
            public void onComplete(@NonNull Task<Void> task) {
-
                Toast.makeText(ActivationService.this, "Geofence completed " , Toast.LENGTH_LONG).show();
-
            }
        });
-
         Toast.makeText(ActivationService.this, "Added geofence", Toast.LENGTH_LONG).show();
-
-*/
-    }
-
-
-    String CHANNEL_ID = "ads";
-    String CHANNEL_NAME = "productactivations";
-
-    private void sendNotification(SdkNotification notification){
- /*
-        Intent resultIntent = new Intent(this , .class);
-        resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(this,
-                0 /* Request code , resultIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT); */
-        NotificationCompat.Builder mBuilder;
-        NotificationManager mNotificationManager;
-
-        mBuilder = new NotificationCompat.Builder(this);
-        mBuilder.setSmallIcon(R.drawable.logo);
-        mBuilder.setContentTitle(notification.subject)
-                .setContentText(notification.message)
-                .setAutoCancel(false)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
-
-        mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
-        {
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance);
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
-            notificationChannel.enableVibration(true);
-            notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-            assert mNotificationManager != null;
-            mBuilder.setChannelId(CHANNEL_ID);
-            mNotificationManager.createNotificationChannel(notificationChannel);
-        }
-        assert mNotificationManager != null;
-        mNotificationManager.notify(100 /* Request Code */, mBuilder.build());
-
-       /*
-        Log.d("sending Notification ", "sending notification " + notification.subject + " " + notification.message);
-
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this, "Ads")
-                        .setContentTitle(notification.subject)
-                        .setSmallIcon(R.drawable.logo)
-                        .setContentText(notification.message);
-
-
-        // Gets an instance of the NotificationManager service//
-        NotificationManagerCompat mNotificationManager = NotificationManagerCompat.from(this);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
-
-            mNotificationManager.createNotificationChannel(mChannel);
-        }
-
-        // When you issue multiple notifications about the same type of event,
-        // it’s best practice for your app to try to update an existing notification
-        // with this new information, rather than immediately creating a new notification.
-        // If you want to update this notification at a later date, you need to assign it an ID.
-        // You can then use this ID whenever you issue a subsequent notification.
-        // If the previous notification is still visible, the system will update this existing notification,
-        // rather than create a new one. In this example, the notification’s ID is 001//
-        mNotificationManager.notify(001, mBuilder.build());
 */
     }
 
@@ -422,8 +360,8 @@ public class ActivationService extends Service {
 
         for(PLocation loc : newR.data){
 
-            if(loc.radius < 50){
-                loc.radius = 50;
+            if(loc.radius < 100){
+                loc.radius = 100;
             }
 
             geofenceList.add(new Geofence.Builder()
