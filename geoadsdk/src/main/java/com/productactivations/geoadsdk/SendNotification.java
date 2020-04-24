@@ -3,8 +3,10 @@ package com.productactivations.geoadsdk;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -58,7 +60,27 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
     String CHANNEL_ID = "ads";
     String CHANNEL_NAME = "productactivations";
 
+
+    private void savePendingUrlToPreferences(){
+        SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editPrefs = prefs.edit();
+        editPrefs.putInt("pending_notification_id", notification.id);
+        editPrefs.putString("pending_package_name", ctx.getPackageName());
+
+        editPrefs.commit();
+    }
+
     private void sendNotification(Bitmap largeIcon){
+
+        Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
+
+//**add this line**
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+//**edit this line to put requestID as requestCode**
+        PendingIntent contentIntent = PendingIntent.getActivity(ctx, 500,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        savePendingUrlToPreferences();
 
         NotificationCompat.Builder mBuilder;
         NotificationManager mNotificationManager;
@@ -70,7 +92,8 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
                 .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(largeIcon))
                 .setContentText(notification.message)
                 .setAutoCancel(false)
-                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .setContentIntent(contentIntent);
 
         mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
 

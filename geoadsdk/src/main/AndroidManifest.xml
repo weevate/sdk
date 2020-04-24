@@ -1,20 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.productactivations.geoadsdk" >
+    package="com.productactivations.geoadsdk">
 
-
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
+        <activity android:name=".WebViewActivity"></activity>
+
         <service android:name=".ActivationService" />
 
-        <receiver android:name=".AlarmReceiver"/>
-
-
-        <receiver android:name=".GeofenceBroadcastReceiver"/>
+        <receiver android:name=".AlarmReceiver" />
+        <receiver android:name=".GeofenceBroadcastReceiver" />
     </application>
+
 </manifest>

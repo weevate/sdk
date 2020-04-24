@@ -120,7 +120,7 @@ public class ActivationService extends Service {
                             public void onPostExecute(String result){
                            //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
-                                if(result!=null && result.indexOf("data") > 0 ){
+                               if(result!=null && result.indexOf("data") > 0 ){
 
                                     ActivationsResponse response  = stringToResponse(result);
                                     registerNotifications(response, mLastLocation);
@@ -257,7 +257,7 @@ public class ActivationService extends Service {
     public void registerNotifications(ActivationsResponse response,  Location currentLocation){
 
 
-//        sendNotification(response.data[0].notifications[0]);
+      // sendNotification(response.data[0].notifications[0]);
 
 
         PLocation closest = response.data[0];
