@@ -123,7 +123,7 @@ public class ActivationService extends Service {
                                if(result!=null && result.indexOf("data") > 0 ){
 
                                     ActivationsResponse response  = stringToResponse(result);
-                                    registerNotifications(response, mLastLocation);
+                                    registerNotifications(response, mLastLocation, 0);
                                 }
                             }
                         }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
@@ -254,26 +254,39 @@ public class ActivationService extends Service {
 
     }
 
-    public void registerNotifications(ActivationsResponse response,  Location currentLocation){
+    public void registerNotifications(ActivationsResponse response,  Location currentLocation, int count){
 
 
       // sendNotification(response.data[0].notifications[0]);
-
-
-        PLocation closest = response.data[0];
+        PLocation closest = response.data[count];
 
         if(closest.notifications.length < 1){
 
-            EasyLogger.toast(this, "No notification found ");
-            return;
+            if(count < response.data.length-1){
+                 count++;
+                EasyLogger.toast(this, "This geofence has no notifications attached  moving to next ("+count+")");
+                registerNotifications(response, currentLocation, count);
+                return;
+            }
         }
 
         if(!inRadius(closest, currentLocation)){
-            //  Toast.makeText(this, "Not IN radius", Toast.LENGTH_SHORT).show();
-
             if(alreadyInGeofence(closest)){
-
+                EasyLogger.toast(this, "Left geofence");
                 removeGeofence(closest);
+            }
+
+            if(count < response.data.length-1){
+
+                EasyLogger.toast(this, "User is not in this geofence. Checking next ("+(count)+")");
+                count++;
+                registerNotifications(response, currentLocation, count);
+            }
+            else{
+
+                EasyLogger.toast(this, "All  ("+(count)+") geofences checked. User not in any");
+
+
             }
             return;
         }

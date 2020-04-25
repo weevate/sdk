@@ -92,11 +92,19 @@ public class ProductActivations {
 
 
     public void onPermissionGranted(){
-
-
             EasyLogger.log("Permission graned ");
 
-            Intent i2 = new Intent(appContext, ActivationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                Utility.scheduleJob(appContext);
+            }
+            catch(Exception es){
+                EasyLogger.toast(appContext, "Error starting job  " + es.getMessage());
+            }
+            EasyLogger.toast(appContext,"Started scheduler");
+        }
+
+          /*  Intent i2 = new Intent(appContext, ActivationService.class);
 
             appContext.startService(i2);
 
@@ -110,7 +118,7 @@ public class ProductActivations {
 
             int interval =  60000;
             am.setRepeating(AlarmManager.RTC_WAKEUP, t.getTimeInMillis(), interval, pendingIntent);
-            EasyLogger.log("Started alarm");
+            EasyLogger.log("Started alarm"); */
 
         }
 

@@ -41,9 +41,7 @@ public class EasyLogger {
 
 
     public static String getDateNow(){
-
         String currentDate = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
-
         return currentDate;
     }
 
