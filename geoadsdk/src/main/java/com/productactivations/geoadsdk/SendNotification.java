@@ -10,16 +10,19 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.Settings;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Random;
 
 public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
@@ -66,21 +69,41 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         SharedPreferences.Editor editPrefs = prefs.edit();
         editPrefs.putInt("pending_notification_id", notification.id);
         editPrefs.putString("pending_package_name", ctx.getPackageName());
-
         editPrefs.commit();
+    }
+
+    public void saveNotificationId(int id ){
+
+        SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editPrefs = prefs.edit();
+        editPrefs.putInt("pending_notification_id", id);
+        editPrefs.commit();
+
+    }
+
+
+    public int getPendingNotificationId( ){
+
+        SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
+        int id = prefs.getInt("pending_notification_id", -1);
+        return id;
+
     }
 
     private void sendNotification(Bitmap largeIcon){
 
-        Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
+        //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
+        String url = Config.url+"/api/v1/geofences/performed_click/"+notification.id+"/"+ctx.getPackageName();
 
-//**add this line**
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        EasyLogger.toast(ctx, "Url posted to is " + url);
+        Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+
 
 //**edit this line to put requestID as requestCode**
         PendingIntent contentIntent = PendingIntent.getActivity(ctx, 500,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+       // savePendingUrlToPreferences();
 
-        savePendingUrlToPreferences();
+
 
         NotificationCompat.Builder mBuilder;
         NotificationManager mNotificationManager;
@@ -110,10 +133,28 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
             mNotificationManager.createNotificationChannel(notificationChannel);
         }
         assert mNotificationManager != null;
-        mNotificationManager.notify(100 /* Request Code */, mBuilder.build());
+        Notification notif = mBuilder.build();
+        notif.flags = Notification.FLAG_AUTO_CANCEL;
+
+        int id = new Random().nextInt(100);
+        EasyLogger.toast(ctx, "Flashed notification"+id);
+        saveNotificationId(id);
+        mNotificationManager.notify(id /* Request Code */, mBuilder.build());
 
     }
 
+
+    public void cancelNotification(int id){
+
+        if(id==-1){
+            return;
+        }
+
+        NotificationManager mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(id);
+        EasyLogger.toast(ctx, "Cleard notification " + id);
+
+    }
 
     @Override
         protected void onPostExecute(Bitmap result) {

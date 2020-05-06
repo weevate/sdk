@@ -1,10 +1,22 @@
 package com.example.startingoverfast;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.productactivations.geoadsdk.ActivationService;
+import com.productactivations.geoadsdk.ActivationsResponse;
 import com.productactivations.geoadsdk.DelayedLogger;
 import com.productactivations.geoadsdk.EasyLogger;
 import com.productactivations.geoadsdk.ProductActivations;
@@ -12,6 +24,8 @@ import com.productactivations.geoadsdk.ProductActivations;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -24,16 +38,85 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    protected LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(1)
+                .setFastestInterval(1)
+                .setMaxWaitTime(1)
+                .setSmallestDisplacement(1);
+
+        return locationRequest;
+    }
+
+    int countAction = 0;
+    int count = 0;
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         logsV = findViewById(R.id.log);
+        coordinate = findViewById(R.id.coordinate);
+        liveAction = findViewById(R.id.live_action);
 
         ProductActivations.getInstance(getApplicationContext()).initialize(MainActivity.this, "NO NORE FCM");
 
+        LocationRequest mLocationRequest = createLocationRequest();
+
+        final FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mFusedLocationClient.requestLocationUpdates(
+                mLocationRequest, new LocationCallback(){
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        final Location mLastLocation = locationResult.getLastLocation();
+                        count++;
+                        coordinate.setText("Update: " + count+ " Lat: " + mLastLocation.getLatitude() + ", long " + mLastLocation.getLongitude());
+
+
+                    }
+                },
+                Looper.myLooper()
+        );
+
+
+        final Handler h = new Handler();
+
+        Runnable run = new Runnable(){
+            @Override
+            public void run(){
+
+                final String line = EasyLogger.getLiveAction(MainActivity.this);
+                MainActivity.this.runOnUiThread(new Runnable(){
+                    @Override
+                    public void run(){
+                        if(line!=null) {
+                            setLiveAction(line);
+                        }
+                        else{
+
+                           setLiveAction("No Update " + (countAction++));
+                        }
+                    }
+                });
+
+                h.postDelayed(this, 4000);
+            }
+        };
+
+        h.post(run);
+
     }
+
+    private void setLiveAction(String line){
+
+        liveAction.setText(line);
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -49,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         for (String s : permissions) {
 
             boolean granted = grantResults[i] == PackageManager.PERMISSION_GRANTED;
-            Toast.makeText(getApplicationContext(), "Permissions granted " + s + " " + grantResults[i] + " " + String.valueOf(granted), Toast.LENGTH_LONG).show();
+            EasyLogger.toast(getApplicationContext(), "Permissions granted " + s + " "  + String.valueOf(granted));
             i++;
         }
         ProductActivations.getInstance(getApplicationContext()).onPermissionGranted();
@@ -72,12 +155,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    TextView logsV;
+    TextView logsV, coordinate, liveAction;
 
     public void loadLogs(View view) {
 
 
-        String[] logs = EasyLogger.getLogs(getApplicationContext());
+         String[] logs =   EasyLogger.getLogs(getApplicationContext());
         Toast.makeText(getApplicationContext(), "Found " + logs.length + " Logs", Toast.LENGTH_LONG).show();
         if (logs == null) {
 

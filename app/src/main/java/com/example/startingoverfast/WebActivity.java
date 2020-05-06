@@ -1,4 +1,4 @@
-package com.productactivations.geoadsdk;
+package com.example.startingoverfast;
 
 import android.Manifest;
 import android.app.Activity;
@@ -26,7 +26,11 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class WebViewActivity extends Activity {
+import com.productactivations.geoadsdk.Config;
+import com.productactivations.geoadsdk.EasyLogger;
+import com.productactivations.geoadsdk.MVideoView;
+
+public class WebActivity extends Activity {
 
 
     private ValueCallback<Uri> mUploadMessage;
@@ -257,7 +261,7 @@ public class WebViewActivity extends Activity {
 
     private void clearNotifications(){
 
-      //  Memory.save(getApplicationContext(), "pending_notification", null);
+        //  Memory.save(getApplicationContext(), "pending_notification", null);
     }
 
     private void startNotificationService(){

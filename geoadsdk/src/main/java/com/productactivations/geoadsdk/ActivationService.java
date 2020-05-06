@@ -65,29 +65,30 @@ import static android.provider.Telephony.Mms.Part.FILENAME;
 public class ActivationService extends Service {
 
     FusedLocationProviderClient mFusedLocationClient;
-
     private GeofencingClient geofencingClient ;
+
+
+    protected LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(1000);
+        locationRequest.setFastestInterval(500);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        return locationRequest;
+    }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
 
         String jsonData = "";
-
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
            // performPostCall("api/v1/geofences/get_geofence", jsonData);
         }
 
         EasyLogger.toast(this, "Started service ");
 
-        LocationRequest mLocationRequest = LocationRequest.create();
-
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(0);
-        mLocationRequest.setFastestInterval(0);
-        mLocationRequest.setNumUpdates(1);
+        LocationRequest mLocationRequest = createLocationRequest();
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -123,7 +124,7 @@ public class ActivationService extends Service {
                                if(result!=null && result.indexOf("data") > 0 ){
 
                                     ActivationsResponse response  = stringToResponse(result);
-                                    registerNotifications(response, mLastLocation, 0);
+                                    registerNotifications(response, mLastLocation);
                                 }
                             }
                         }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
@@ -254,40 +255,28 @@ public class ActivationService extends Service {
 
     }
 
-    public void registerNotifications(ActivationsResponse response,  Location currentLocation, int count){
+    public void registerNotifications(ActivationsResponse response,  Location currentLocation){
 
 
       // sendNotification(response.data[0].notifications[0]);
-        PLocation closest = response.data[count];
+        PLocation closest = response.data[0];
 
         if(closest.notifications.length < 1){
 
-            if(count < response.data.length-1){
-                 count++;
-                EasyLogger.toast(this, "This geofence has no notifications attached  moving to next ("+count+")");
-                registerNotifications(response, currentLocation, count);
+
+                EasyLogger.toast(this, "This geofence has no notifications attached");
+       //         registerNotifications(response, currentLocation, count);
                 return;
-            }
+
         }
 
         if(!inRadius(closest, currentLocation)){
             if(alreadyInGeofence(closest)){
-                EasyLogger.toast(this, "Left geofence");
+                EasyLogger.toast(this, "Exited geofence " + closest.name);
                 removeGeofence(closest);
             }
 
-            if(count < response.data.length-1){
 
-                EasyLogger.toast(this, "User is not in this geofence. Checking next ("+(count)+")");
-                count++;
-                registerNotifications(response, currentLocation, count);
-            }
-            else{
-
-                EasyLogger.toast(this, "All  ("+(count)+") geofences checked. User not in any");
-
-
-            }
             return;
         }
 
