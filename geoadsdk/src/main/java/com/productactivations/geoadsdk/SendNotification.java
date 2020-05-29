@@ -54,8 +54,11 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
                 return myBitmap;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                EasyLogger.toast(ctx, "Image error malformed url " + e.getMessage() + ", " + e.getLocalizedMessage());
             } catch (IOException e) {
                 e.printStackTrace();
+                EasyLogger.toast(ctx, "Image error IO Exception url " + e.getMessage() + ", " + e.getLocalizedMessage());
+
             }
             return null;
         }
@@ -114,7 +117,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
                 .setLargeIcon(largeIcon)
                 .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(largeIcon))
                 .setContentText(notification.message)
-                .setAutoCancel(false)
+                .setAutoCancel(true)
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setContentIntent(contentIntent);
 
@@ -134,7 +137,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         }
         assert mNotificationManager != null;
         Notification notif = mBuilder.build();
-        notif.flags = Notification.FLAG_AUTO_CANCEL;
+        notif.flags |= Notification.FLAG_AUTO_CANCEL;
 
         int id = new Random().nextInt(100);
         EasyLogger.toast(ctx, "Flashed notification"+id);
