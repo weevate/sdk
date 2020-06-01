@@ -3,5 +3,6 @@
 
     <string name="title_activity_splash">Splash</string>
     <string name="dummy_button">Dummy Button</string>
+    <string name="service_name">WeevateService</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
