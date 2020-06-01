@@ -6,7 +6,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -50,26 +49,6 @@ public class ProductActivations {
 
     }
 
-
-
-    public boolean AppHasRunBefore(){
-
-        SharedPreferences preferences  = appContext.getSharedPreferences("geoadsdk", Context.MODE_PRIVATE);
-        boolean runBefore = preferences.getBoolean("runBefore", false);
-        return runBefore;
-
-    }
-
-
-    public void updateRunStatus(){
-
-        SharedPreferences preferences  = appContext.getSharedPreferences("geoadsdk", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editPref = preferences.edit();
-        editPref.putBoolean("runBefore", true);
-        editPref.apply();
-        editPref.commit();
-
-    }
     public void initialize(Activity activity, String fcm_token){
 
         String packageName  = this.appContext.getPackageName();
@@ -111,19 +90,11 @@ public class ProductActivations {
 
 
     public void onPermissionGranted(){
+            EasyLogger.log("Permission graned ");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
                 Utility.scheduleJob(appContext);
-                if(!AppHasRunBefore()) {
-                    updateRunStatus();
-                    EasyLogger.toast(appContext, "started first time");
-                    Utility.scheduleWithWorkManager(appContext);
-                }
-                else{
-
-                    EasyLogger.toast(appContext, "Skipping start. App already run before");
-                }
             }
             catch(Exception es){
                 EasyLogger.toast(appContext, "Error starting job  " + es.getMessage());
@@ -131,6 +102,21 @@ public class ProductActivations {
             EasyLogger.toast(appContext,"Started scheduler");
         }
 
+          /*  Intent i2 = new Intent(appContext, ActivationService.class);
+
+            appContext.startService(i2);
+
+            EasyLogger.log("Started service" );
+            AlarmManager am = (AlarmManager)this.appContext.getSystemService(ALARM_SERVICE);
+            Intent i = new Intent(this.appContext, AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Calendar t = Calendar.getInstance();
+            t.setTimeInMillis(System.currentTimeMillis());
+
+            int interval =  60000;
+            am.setRepeating(AlarmManager.RTC_WAKEUP, t.getTimeInMillis(), interval, pendingIntent);
+            EasyLogger.log("Started alarm"); */
 
         }
 
@@ -188,6 +174,13 @@ public class ProductActivations {
         }
 
         return resp;
+    }
+
+
+    public void start(){
+
+        Intent i = new Intent(this.appContext, ActivationService.class);
+        this.appContext.startService(i);
     }
 
 

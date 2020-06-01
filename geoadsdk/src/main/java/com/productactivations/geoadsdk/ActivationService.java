@@ -1,19 +1,49 @@
 package com.productactivations.geoadsdk;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
+
+import android.app.Activity;
+import android.app.IntentService;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.job.JobParameters;
-import android.app.job.JobService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
+import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.Geofence;
@@ -23,19 +53,16 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
+import static android.provider.Telephony.Mms.Part.FILENAME;
 
-@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class GeoJobService extends JobService {
-
-
+public class ActivationService extends Service {
 
     FusedLocationProviderClient mFusedLocationClient;
     private GeofencingClient geofencingClient ;
@@ -51,88 +78,66 @@ public class GeoJobService extends JobService {
     }
 
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId){
 
-
-        private static final String TAG = "SyncService";
-
-        @Override
-        public boolean onStartJob(JobParameters params) {
-
-            doJob();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Utility.scheduleJob(getApplicationContext()); // reschedule the job
-            }
-            return true;
+        String jsonData = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+           // performPostCall("api/v1/geofences/get_geofence", jsonData);
         }
 
-        @Override
-        public boolean onStopJob(JobParameters params) {
-            return true;
-        }
+        EasyLogger.toast(this, "Started service ");
+
+        LocationRequest mLocationRequest = createLocationRequest();
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mFusedLocationClient.requestLocationUpdates(
+                mLocationRequest, new LocationCallback(){
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        final Location mLastLocation = locationResult.getLastLocation();
+
+                        EasyLogger.toast(ActivationService.this,  "Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
+
+                        String json = "{ \n" +
+                                "\"Latitude\":\""+mLastLocation.getLatitude()+"\",\n" +
+                                "\"Longitude\":\""+mLastLocation.getLongitude()+"\",\n" +
+                                "\"DeviceId\":\"484848484848\"\n" +
+                                "}";
 
 
 
+                        new doPostRequest(){
+
+                            @Override
+                            public void onPreExecute(){
+                           //     Toast.makeText(getApplicationContext(), "About to start ", Toast.LENGTH_LONG).show();
+
+                            }
 
 
-        private void doJob(){
-            String jsonData = "";
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                // performPostCall("api/v1/geofences/get_geofence", jsonData);
-            }
+                            @Override
+                            public void onPostExecute(String result){
+                           //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
-            EasyLogger.toast(this, "Started service ");
+                               if(result!=null && result.indexOf("data") > 0 ){
 
-            LocationRequest mLocationRequest = createLocationRequest();
-
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-            mFusedLocationClient.requestLocationUpdates(
-                    mLocationRequest, new LocationCallback(){
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
-                            final Location mLastLocation = locationResult.getLastLocation();
-
-                          //  EasyLogger.toast(GeoJobService.this,  "Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
-
-                            String json = "{ \n" +
-                                    "\"Latitude\":\""+mLastLocation.getLatitude()+"\",\n" +
-                                    "\"Longitude\":\""+mLastLocation.getLongitude()+"\",\n" +
-                                    "\"DeviceId\":\"484848484848\"\n" +
-                                    "}";
-
-
-
-                            new doPostRequest(){
-
-                                @Override
-                                public void onPreExecute(){
-                                    //     Toast.makeText(getApplicationContext(), "About to start ", Toast.LENGTH_LONG).show();
-
+                                    ActivationsResponse response  = stringToResponse(result);
+                                    registerNotifications(response, mLastLocation);
                                 }
+                            }
+                        }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
 
+                    }
+                },
+                Looper.myLooper()
+        );
 
-                                @Override
-                                public void onPostExecute(String result){
-                                    //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), "returning sticky ", Toast.LENGTH_LONG).show();
 
-                                    if(result!=null && result.indexOf("data") > 0 ){
-
-                                        ActivationsResponse response  = stringToResponse(result);
-                                        registerNotifications(response, mLastLocation);
-                                    }
-                                }
-                            }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
-
-                        }
-                    },
-                    Looper.myLooper()
-            );
-
-            //Toast.makeText(getApplicationContext(), "returning sticky ", Toast.LENGTH_LONG).show();
-
-
-
-        }
+        return Service.START_NOT_STICKY;
+    }
 
 
 
@@ -141,18 +146,18 @@ public class GeoJobService extends JobService {
     public ActivationsResponse stringToResponse(String result){
 
         try {
-            // Toast.makeText(ActivationService.this, " Parsing ", Toast.LENGTH_LONG).show();
+           // Toast.makeText(ActivationService.this, " Parsing ", Toast.LENGTH_LONG).show();
             Gson gson = new Gson();
             ActivationsResponse response = gson.fromJson(result, ActivationsResponse.class);
 
             EasyLogger.toast(this, "Finished parsing, found " + response.data.length + " nearby geofences");
-            // Toast.makeText(ActivationService.this, "Finished parsing " + response.data.length, Toast.LENGTH_LONG).show();
+           // Toast.makeText(ActivationService.this, "Finished parsing " + response.data.length, Toast.LENGTH_LONG).show();
             return response;
         }
         catch(Exception es){
             EasyLogger.log("error parsing location " + es.toString());
             EasyLogger.toast(this, "Exception getting location " + es.toString());
-            //   Toast.makeText(getApplicationContext(), "Exception getting location " + es.toString(), Toast.LENGTH_LONG).show();
+        //   Toast.makeText(getApplicationContext(), "Exception getting location " + es.toString(), Toast.LENGTH_LONG).show();
         }
         return null;
     }
@@ -166,7 +171,7 @@ public class GeoJobService extends JobService {
         int lastEnteredId = prefs.getInt("last_geofence_id", -1);
 
         EasyLogger.toast(getApplicationContext(), "Last registered geofence id" + lastEnteredId + ". This one is " + location.id);
-        // Toast.makeText(getApplicationContext(), "Last entered " + lastEnteredId + " vs " + location.id, Toast.LENGTH_LONG).show();
+       // Toast.makeText(getApplicationContext(), "Last entered " + lastEnteredId + " vs " + location.id, Toast.LENGTH_LONG).show();
         return (lastEnteredId == location.id);
 
 
@@ -207,13 +212,9 @@ public class GeoJobService extends JobService {
     public boolean inRadius(PLocation geofence, Location currentLocation){
 
         Log.d("calc distance to " + geofence.name ,  geofence.latitude + ", long" + geofence.longitude + " vs " + currentLocation.getLatitude() + ": " + currentLocation.getLongitude());
-      /*  if(geofence.radius < 100){
+         if(geofence.radius < 100){
             geofence.radius = 100;
         }
-
-       */
-
-        geofence.radius = 10;
 
         double lat1 = geofence.latitude;
         double lng1 = geofence.longitude;
@@ -231,8 +232,7 @@ public class GeoJobService extends JobService {
         float dist = (float) (earthRadius * c);
 
         EasyLogger.toast(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
-        EasyLogger.saveForViewing(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius + " (Checked against " + " lat" + currentLocation.getLatitude() +", lng "+ currentLocation.getLongitude()+")");
-
+        Log.d("Distance is " , "Dist is " + dist + " vs " + (float) geofence.radius);
         boolean result = dist <= (float) geofence.radius;
 
         EasyLogger.toast(this, "In Geofence? "+String.valueOf(result));
@@ -258,27 +258,21 @@ public class GeoJobService extends JobService {
     public void registerNotifications(ActivationsResponse response,  Location currentLocation){
 
 
-        // sendNotification(response.data[0].notifications[0]);
+      // sendNotification(response.data[0].notifications[0]);
         PLocation closest = response.data[0];
 
         if(closest.notifications.length < 1){
 
 
-            EasyLogger.toast(this, "This geofence has no notifications attached");
-            //         registerNotifications(response, currentLocation, count);
-            return;
+                EasyLogger.toast(this, "This geofence has no notifications attached");
+       //         registerNotifications(response, currentLocation, count);
+                return;
 
         }
 
-        //cancel already displayed notification
         if(!inRadius(closest, currentLocation)){
             if(alreadyInGeofence(closest)){
                 EasyLogger.toast(this, "Exited geofence " + closest.name);
-                SendNotification nm = new SendNotification(getApplicationContext(), null);
-                 int displayedNotification = nm.getPendingNotificationId();
-                if(displayedNotification!=-1)
-                nm.cancelNotification(displayedNotification);
-                nm.saveNotificationId(-1);
                 removeGeofence(closest);
             }
 
@@ -361,7 +355,7 @@ public class GeoJobService extends JobService {
     }
     public  ArrayList<Geofence> getGeofences(ActivationsResponse newR){
 
-        geofencingClient = LocationServices.getGeofencingClient(GeoJobService.this);
+        geofencingClient = LocationServices.getGeofencingClient(ActivationService.this);
 
         ArrayList<Geofence> geofenceList = new ArrayList<Geofence>();
 
@@ -469,5 +463,11 @@ public class GeoJobService extends JobService {
 
         return resp;
     }
-    }
 
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+}

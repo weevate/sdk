@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-def work_manager_version = "2.3.0-alpha06"
 
 android {
     compileSdkVersion 29
@@ -32,7 +31,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.android.support:appcompat-v7:2  8.0.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
@@ -42,7 +41,4 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:16.0.0'
     implementation 'com.android.support:support-compat:27.1.0'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation "androidx.work:work-runtime:2.3.4"
-
-    compile 'com.firebase:firebase-jobdispatcher:0.5.2'
 }

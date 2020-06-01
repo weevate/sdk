@@ -1,7 +1,6 @@
 package com.example.startingoverfast;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -9,8 +8,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -18,6 +15,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.productactivations.geoadsdk.ActivationService;
 import com.productactivations.geoadsdk.ActivationsResponse;
 import com.productactivations.geoadsdk.DelayedLogger;
 import com.productactivations.geoadsdk.EasyLogger;
@@ -111,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
 
         h.post(run);
 
-        isGooglePlayServicesAvailable(this);
     }
 
     private void setLiveAction(String line){
@@ -140,21 +137,6 @@ public class MainActivity extends AppCompatActivity {
         }
         ProductActivations.getInstance(getApplicationContext()).onPermissionGranted();
 
-    }
-
-
-    public boolean isGooglePlayServicesAvailable(Activity activity) {
-        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-        int status = googleApiAvailability.isGooglePlayServicesAvailable(activity);
-        if(status != ConnectionResult.SUCCESS) {
-            if(googleApiAvailability.isUserResolvableError(status)) {
-                googleApiAvailability.getErrorDialog(activity, status, 2404).show();
-            }
-            return false;
-        }
-
-       EasyLogger.toast(getApplicationContext(),"Google play available");
-        return true;
     }
 
 
