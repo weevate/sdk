@@ -37,7 +37,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         }
 
 
-        String host_url = "https://productactivations.com";
+        String host_url = "https://app.weevate.com/";
         @Override
         protected Bitmap doInBackground(String... params) {
 
@@ -45,7 +45,9 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
            // message = params[0] + params[1];
             try {
 
-                URL url = new URL(host_url+notification.icon);
+                String m_url = host_url+notification.icon;
+                EasyLogger.toast(ctx, "Sending notification " + m_url);
+                URL url = new URL(m_url);
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 connection.setDoInput(true);
                 connection.connect();
