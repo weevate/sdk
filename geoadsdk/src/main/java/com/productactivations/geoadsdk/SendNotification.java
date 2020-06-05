@@ -117,8 +117,6 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         PendingIntent contentIntent = PendingIntent.getActivity(ctx, 500,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
        // savePendingUrlToPreferences();
 
-
-
         NotificationCompat.Builder mBuilder;
         NotificationManager mNotificationManager;
 
@@ -153,7 +151,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         int id = new Random().nextInt(100);
         EasyLogger.toast(ctx, "Flashed notification"+id);
         saveNotificationId(id);
-        mNotificationManager.notify(id /* Request Code */, mBuilder.build());
+        mNotificationManager.notify(id /* Request Code */, notif);
         service.finishJob();
 
     }
