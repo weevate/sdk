@@ -17,10 +17,9 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Toast.makeText(context,  "Started after boot", Toast.LENGTH_LONG).show();
-
+                Toast.makeText(context,  "Started Weevate", Toast.LENGTH_LONG).show();
                 Utility.scheduleJob(context);
-                EasyLogger.toast(context, "Started after boot");
+                EasyLogger.toast(context, "Started weevate after boot");
             }
         }
 

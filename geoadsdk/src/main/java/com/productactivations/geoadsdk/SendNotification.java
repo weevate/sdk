@@ -12,8 +12,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -29,11 +31,14 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         Context ctx;
         String message;
         SdkNotification notification;
+        GeoJobService service;
 
-        public SendNotification(Context context, SdkNotification notification) {
+
+        public SendNotification(Context context, SdkNotification notification, GeoJobService service) {
             super();
             this.ctx = context;
             this.notification = notification;
+
         }
 
 
@@ -92,6 +97,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void sendNotification(Bitmap largeIcon){
 
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
@@ -142,6 +148,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         EasyLogger.toast(ctx, "Flashed notification"+id);
         saveNotificationId(id);
         mNotificationManager.notify(id /* Request Code */, mBuilder.build());
+        service.finishJob();
 
     }
 
@@ -152,8 +159,8 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
             return;
         }
 
-        NotificationManager mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.cancel(id);
+       // NotificationManager mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+        //mNotificationManager.ca ncel(id);
         EasyLogger.toast(ctx, "Cleard notification " + id);
 
     }

@@ -246,7 +246,7 @@ public class ActivationService extends Service {
 
     private void sendNotification(SdkNotification notification){
         try {
-            new SendNotification(this, notification).execute("");
+        //    new SendNotification(this, notification, this).execute("");
         }
         catch(Exception es){
 

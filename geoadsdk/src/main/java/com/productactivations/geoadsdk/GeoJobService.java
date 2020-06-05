@@ -39,6 +39,7 @@ public class GeoJobService extends JobService {
 
     FusedLocationProviderClient mFusedLocationClient;
     private GeofencingClient geofencingClient ;
+    private JobParameters params;
 
 
     protected LocationRequest createLocationRequest() {
@@ -246,7 +247,7 @@ public class GeoJobService extends JobService {
 
     private void sendNotification(SdkNotification notification){
         try {
-            new SendNotification(this, notification).execute("");
+            new SendNotification(this, notification, this).execute("");
         }
         catch(Exception es){
 
@@ -274,15 +275,13 @@ public class GeoJobService extends JobService {
         if(!inRadius(closest, currentLocation)){
             if(alreadyInGeofence(closest)){
                 EasyLogger.toast(this, "Exited geofence " + closest.name);
-                SendNotification nm = new SendNotification(getApplicationContext(), null);
+                SendNotification nm = new SendNotification(getApplicationContext(), null, this);
                  int displayedNotification = nm.getPendingNotificationId();
                 if(displayedNotification!=-1)
                 nm.cancelNotification(displayedNotification);
                 nm.saveNotificationId(-1);
                 removeGeofence(closest);
             }
-
-
             return;
         }
 
@@ -294,6 +293,8 @@ public class GeoJobService extends JobService {
 
         setGeofence(closest);
         sendNotification(closest.notifications[0]);
+
+
 
 
         /*
@@ -332,6 +333,11 @@ public class GeoJobService extends JobService {
        });
         Toast.makeText(ActivationService.this, "Added geofence", Toast.LENGTH_LONG).show();
 */
+    }
+
+    public void finishJob(){
+
+        this.jobFinished(this.params, true);
     }
 
 

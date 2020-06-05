@@ -90,6 +90,7 @@ public class ProductActivations {
 
 
     public void onPermissionGranted(){
+
             EasyLogger.log("Permission graned ");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -101,6 +102,8 @@ public class ProductActivations {
             }
             EasyLogger.toast(appContext,"Started scheduler");
         }
+
+
 
           /*  Intent i2 = new Intent(appContext, ActivationService.class);
 
