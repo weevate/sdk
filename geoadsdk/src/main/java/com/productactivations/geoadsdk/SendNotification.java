@@ -41,6 +41,12 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         }
 
+        public SendNotification(Context context, SdkNotification notification, ActivationService service) {
+            super();
+            this.ctx = context;
+            this.notification = notification;
+
+        }
 
         String host_url = "https://app.weevate.com/";
         @Override
@@ -171,7 +177,9 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
             super.onPostExecute(result);
             try {
                 EasyLogger.log("result is " + result);
-                sendNotification(result);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    sendNotification(result);
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();

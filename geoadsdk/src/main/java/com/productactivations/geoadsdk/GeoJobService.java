@@ -58,7 +58,7 @@ public class GeoJobService extends JobService {
 
         @Override
         public boolean onStartJob(JobParameters params) {
-
+            EasyLogger.toast(getApplicationContext(), "Started execution of job");
             doJob();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Utility.scheduleJob(getApplicationContext()); // reschedule the job
@@ -67,7 +67,8 @@ public class GeoJobService extends JobService {
         }
 
         @Override
-        public boolean onStopJob(JobParameters params) {
+        public boolean onStopJob(JobParameters params)
+        {
             return true;
         }
 
@@ -117,7 +118,7 @@ public class GeoJobService extends JobService {
                                     //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
                                     if(result!=null && result.indexOf("data") > 0 ){
-
+                                        //EasyLogger.toast(getApplicationContext(), result);
                                         ActivationsResponse response  = stringToResponse(result);
                                         registerNotifications(response, mLastLocation);
                                     }
@@ -208,13 +209,11 @@ public class GeoJobService extends JobService {
     public boolean inRadius(PLocation geofence, Location currentLocation){
 
         Log.d("calc distance to " + geofence.name ,  geofence.latitude + ", long" + geofence.longitude + " vs " + currentLocation.getLatitude() + ": " + currentLocation.getLongitude());
-      /*  if(geofence.radius < 100){
+       if(geofence.radius < 100){
             geofence.radius = 100;
         }
 
-       */
 
-        geofence.radius = 10;
 
         double lat1 = geofence.latitude;
         double lng1 = geofence.longitude;
@@ -262,10 +261,11 @@ public class GeoJobService extends JobService {
         // sendNotification(response.data[0].notifications[0]);
         PLocation closest = response.data[0];
 
+
         if(closest.notifications.length < 1){
 
 
-            EasyLogger.toast(this, "This geofence has no notifications attached");
+            EasyLogger.toast(this, "This geofence has no notifications attached ");
             //         registerNotifications(response, currentLocation, count);
             return;
 

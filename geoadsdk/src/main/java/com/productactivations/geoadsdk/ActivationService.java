@@ -81,10 +81,14 @@ public class ActivationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
 
+
+        doJob();
+        return Service.START_NOT_STICKY;
+    }
+
+
+    private void doJob(){
         String jsonData = "";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-           // performPostCall("api/v1/geofences/get_geofence", jsonData);
-        }
 
         EasyLogger.toast(this, "Started service ");
 
@@ -98,7 +102,7 @@ public class ActivationService extends Service {
                     public void onLocationResult(LocationResult locationResult) {
                         final Location mLastLocation = locationResult.getLastLocation();
 
-                        EasyLogger.toast(ActivationService.this,  "Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
+                        //  EasyLogger.toast(GeoJobService.this,  "Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
 
                         String json = "{ \n" +
                                 "\"Latitude\":\""+mLastLocation.getLatitude()+"\",\n" +
@@ -112,16 +116,16 @@ public class ActivationService extends Service {
 
                             @Override
                             public void onPreExecute(){
-                           //     Toast.makeText(getApplicationContext(), "About to start ", Toast.LENGTH_LONG).show();
+                                //     Toast.makeText(getApplicationContext(), "About to start ", Toast.LENGTH_LONG).show();
 
                             }
 
 
                             @Override
                             public void onPostExecute(String result){
-                           //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
+                                //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
-                               if(result!=null && result.indexOf("data") > 0 ){
+                                if(result!=null && result.indexOf("data") > 0 ){
 
                                     ActivationsResponse response  = stringToResponse(result);
                                     registerNotifications(response, mLastLocation);
@@ -136,8 +140,35 @@ public class ActivationService extends Service {
 
         //Toast.makeText(getApplicationContext(), "returning sticky ", Toast.LENGTH_LONG).show();
 
-        return Service.START_NOT_STICKY;
+
+
     }
+
+
+
+
+    class doPostRequest extends AsyncTask<String, String, String> {
+
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return performPostCall(strings[0], strings[1]);
+            }
+
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(String result){
+
+
+        }
+    }
+
 
 
 
@@ -180,7 +211,6 @@ public class ActivationService extends Service {
 
 
     private boolean setGeofence(PLocation location){
-
 
         SharedPreferences prefs  = this.getApplicationContext().getSharedPreferences("geofences", Context.MODE_PRIVATE);
         SharedPreferences.Editor editPrefs = prefs.edit();
@@ -246,7 +276,7 @@ public class ActivationService extends Service {
 
     private void sendNotification(SdkNotification notification){
         try {
-        //    new SendNotification(this, notification, this).execute("");
+            new SendNotification(this, notification, this).execute("");
         }
         catch(Exception es){
 
@@ -289,43 +319,6 @@ public class ActivationService extends Service {
         setGeofence(closest);
         sendNotification(closest.notifications[0]);
 
-
-        /*
-       ArrayList<Geofence> geofenceList = getGeofences(response);
-        if(geofenceList.size() < 1){
-            EasyLogger.log("No notifications set");
-            return;
-        }
-       geofencingClient.addGeofences(getGeofenceingRequest(geofenceList), getGeofencePendingIntent()).addOnSuccessListener(new Executor() {
-           @Override
-           public void execute(Runnable command) {
-               EasyLogger.log("Inside executor");
-           }
-       }, new OnSuccessListener<Void>() {
-           @Override
-           public void onSuccess(Void aVoid) {
-               Toast.makeText(ActivationService.this, "Success adding", Toast.LENGTH_LONG).show();
-           }
-       }).addOnFailureListener(new OnFailureListener() {
-           @Override
-           public void onFailure(@NonNull Exception e) {
-               LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-               if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                   Toast.makeText(ActivationService.this, "GPS Provider not avaialeble" + e.toString(), Toast.LENGTH_LONG).show();
-               }
-               if (!manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-                   Toast.makeText(ActivationService.this, "Network provider not avaialeble" + e.toString(), Toast.LENGTH_LONG).show();
-               }
-               Toast.makeText(ActivationService.this, "failure adding " + e.toString(), Toast.LENGTH_LONG).show();
-           }
-       }).addOnCompleteListener(new OnCompleteListener<Void>() {
-           @Override
-           public void onComplete(@NonNull Task<Void> task) {
-               Toast.makeText(ActivationService.this, "Geofence completed " , Toast.LENGTH_LONG).show();
-           }
-       });
-        Toast.makeText(ActivationService.this, "Added geofence", Toast.LENGTH_LONG).show();
-*/
     }
 
 
@@ -384,29 +377,6 @@ public class ActivationService extends Service {
         }
 
         return geofenceList;
-    }
-
-
-    class doPostRequest extends AsyncTask<String, String, String> {
-
-
-        @Override
-        protected String doInBackground(String... strings) {
-
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                return performPostCall(strings[0], strings[1]);
-            }
-
-            return null;
-        }
-
-
-        @Override
-        protected void onPostExecute(String result){
-
-
-        }
     }
 
 

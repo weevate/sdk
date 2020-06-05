@@ -3,10 +3,13 @@ package com.productactivations.geoadsdk;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -43,6 +46,7 @@ public class ProductActivations {
 
     private int requestCode = 1;
     private String radar_api_key = "prj_live_pk_4fb9d494fd14401117079572640b88ba67819c73";
+    private int small_icon;
     private ProductActivations(Context appContext){
 
         this.appContext = appContext;
@@ -50,7 +54,8 @@ public class ProductActivations {
     }
 
     public void initialize(Activity activity, String fcm_token){
-
+        ensureLocationEnabled(activity);
+        this.small_icon = small_icon;
         String packageName  = this.appContext.getPackageName();
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 200);
@@ -62,7 +67,7 @@ public class ProductActivations {
                 Settings.Secure.ANDROID_ID);
 
         String device_id = android_id;
-        final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\""+fcm_token+"\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+        final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         Log.d("JSON_LOAD", deviceData);
@@ -91,7 +96,7 @@ public class ProductActivations {
 
     public void onPermissionGranted(){
 
-            EasyLogger.log("Permission graned ");
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
@@ -105,27 +110,53 @@ public class ProductActivations {
 
 
 
-          /*  Intent i2 = new Intent(appContext, ActivationService.class);
+        /*   Intent i2 = new Intent(appContext, ActivationService.class);
 
             appContext.startService(i2);
 
             EasyLogger.log("Started service" );
             AlarmManager am = (AlarmManager)this.appContext.getSystemService(ALARM_SERVICE);
             Intent i = new Intent(this.appContext, AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getService(appContext, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
 
             Calendar t = Calendar.getInstance();
             t.setTimeInMillis(System.currentTimeMillis());
 
-            int interval =  60000;
+            int interval =  120000;
             am.setRepeating(AlarmManager.RTC_WAKEUP, t.getTimeInMillis(), interval, pendingIntent);
-            EasyLogger.log("Started alarm"); */
+           // EasyLogger.log("Started alarm"); */
 
         }
 
 
 
+    public void ensureLocationEnabled(final Activity activity){
+        LocationManager lm = (LocationManager) appContext.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
 
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        if(!gps_enabled && !network_enabled) {
+            // notify user
+            new AlertDialog.Builder(activity)
+                    .setMessage("To get the best out of this app, please enable locations")
+                    .setPositiveButton("Enable Location", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            activity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                            .setNegativeButton("Cancel",null)
+                            .show();
+        }
+    }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public String  performPostCall(String requestURL,
                                    String jsonData) {
