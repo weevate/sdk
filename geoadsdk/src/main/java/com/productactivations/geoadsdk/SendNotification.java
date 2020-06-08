@@ -41,7 +41,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         }
 
-        public SendNotification(Context context, SdkNotification notification, ActivationService service) {
+        public SendNotification(Context context, SdkNotification notification) {
             super();
             this.ctx = context;
             this.notification = notification;
