@@ -211,12 +211,6 @@ public class ProductActivations {
     }
 
 
-    public void start(){
-
-        Intent i = new Intent(this.appContext, ActivationService.class);
-        this.appContext.startService(i);
-    }
-
 
 
     public static ProductActivations getInstance(Context appContext){

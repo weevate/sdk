@@ -106,6 +106,14 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void sendNotification(Bitmap largeIcon){
 
+        if(hasNotBeenDeliveredToday(notification.id)){
+
+            EasyLogger.toast(ctx, "Cancellilng delivery");
+            return;
+        }
+
+        saveDeliveredNotification(notification.id);
+
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
         String url = Config.url+"/api/v1/geofences/performed_click/"+notification.id+"/"+ctx.getPackageName();
 
@@ -153,6 +161,46 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         saveNotificationId(id);
         mNotificationManager.notify(id /* Request Code */, notif);
         service.finishJob();
+
+    }
+
+
+    //save the time this notification was displayed to avoid displaying again till a day has passed
+    public void saveDeliveredNotification(int not_id){
+
+        SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editPrefs = prefs.edit();
+        editPrefs.putString("n"+not_id, "t"+System.currentTimeMillis());
+        editPrefs.commit();
+
+    }
+
+
+    //save the time this notification was displayed to avoid displaying again till a day has passed
+    private boolean hasNotBeenDeliveredToday(int not_id){
+
+        SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
+        String not_delivery_time = prefs.getString("n"+not_id, null);
+
+        if(not_delivery_time == null) {
+            EasyLogger.toast(ctx, "Not has not been delivered before");
+            return false;
+        }
+
+        long timeDelivered = Long.valueOf(not_delivery_time.replace("t", ""));
+
+        long currentTime = System.currentTimeMillis();
+        long timeElapsed = currentTime - timeDelivered;
+
+        int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
+
+        EasyLogger.toast(ctx, "Hours passed since note was delivered " + hoursPassed);
+
+        boolean hasBeenDelivered = hoursPassed >= 24;
+
+        EasyLogger.toast(ctx, "Has note been delivered today? " + String.valueOf(hasBeenDelivered));
+        return hasBeenDelivered;
+
 
     }
 

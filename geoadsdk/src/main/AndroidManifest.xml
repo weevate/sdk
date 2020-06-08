@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
-        <activity android:name=".WebViewActivity"></activity>
 
 
         <service android:name=".GeoJobService"
