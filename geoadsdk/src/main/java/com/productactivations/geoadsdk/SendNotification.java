@@ -57,7 +57,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
             try {
 
                 String m_url = host_url+notification.icon;
-                EasyLogger.toast(ctx, "Sending notification " + m_url);
+           //     EasyLogger.toast(ctx, "Sending notification " + m_url);
                 URL url = new URL(m_url);
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 connection.setDoInput(true);
@@ -112,6 +112,8 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
             return;
         }
 
+        EasyLogger.toast(ctx, "Not cancelling notification");
+
         saveDeliveredNotification(notification.id);
 
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
@@ -157,7 +159,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         notif.flags = Notification.FLAG_AUTO_CANCEL;
 
         int id = new Random().nextInt(100);
-        EasyLogger.toast(ctx, "Flashed notification"+id);
+        //EasyLogger.toast(ctx, "Flashed notification"+id);
         saveNotificationId(id);
         mNotificationManager.notify(id /* Request Code */, notif);
         service.finishJob();
@@ -170,7 +172,11 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
         SharedPreferences.Editor editPrefs = prefs.edit();
-        editPrefs.putString("n"+not_id, "t"+System.currentTimeMillis());
+        String key = "n"+not_id;
+        String value = "t"+System.currentTimeMillis();
+
+        EasyLogger.toast(ctx, "Saving " + key + " with value " + value);
+        editPrefs.putString(key, value);
         editPrefs.commit();
 
     }
@@ -179,8 +185,13 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
     //save the time this notification was displayed to avoid displaying again till a day has passed
     private boolean hasNotBeenDeliveredToday(int not_id){
 
+        EasyLogger.toast(ctx, "Checking not_id " + not_id);
         SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
-        String not_delivery_time = prefs.getString("n"+not_id, null);
+
+        String key = "n"+not_id;
+        String not_delivery_time = prefs.getString(key, null);
+
+        EasyLogger.toast(ctx, "Checking " + key + "  found " + not_delivery_time);
 
         if(not_delivery_time == null) {
             EasyLogger.toast(ctx, "Not has not been delivered before");
@@ -189,14 +200,17 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         long timeDelivered = Long.valueOf(not_delivery_time.replace("t", ""));
 
+        EasyLogger.toast(ctx, "Long value  " + timeDelivered);
         long currentTime = System.currentTimeMillis();
         long timeElapsed = currentTime - timeDelivered;
+
+        EasyLogger.toast(ctx, "Time passed in millis " + timeElapsed);
 
         int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
 
         EasyLogger.toast(ctx, "Hours passed since note was delivered " + hoursPassed);
 
-        boolean hasBeenDelivered = hoursPassed >= 24;
+        boolean hasBeenDelivered = hoursPassed < 24;
 
         EasyLogger.toast(ctx, "Has note been delivered today? " + String.valueOf(hasBeenDelivered));
         return hasBeenDelivered;
@@ -213,7 +227,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
        // NotificationManager mNotificationManager = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
         //mNotificationManager.ca ncel(id);
-        EasyLogger.toast(ctx, "Cleard notification " + id);
+        //EasyLogger.toast(ctx, "Cleard notification " + id);
 
     }
 

@@ -58,7 +58,7 @@ public class GeoJobService extends JobService {
 
         @Override
         public boolean onStartJob(JobParameters params) {
-            EasyLogger.toast(getApplicationContext(), "Started execution of job");
+           // EasyLogger.toast(getApplicationContext(), "Started execution of job");
             doJob();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Utility.scheduleJob(getApplicationContext()); // reschedule the job
@@ -82,7 +82,7 @@ public class GeoJobService extends JobService {
                 // performPostCall("api/v1/geofences/get_geofence", jsonData);
             }
 
-            EasyLogger.toast(this, "Started service ");
+          //  EasyLogger.toast(this, "Started service ");
 
             LocationRequest mLocationRequest = createLocationRequest();
 
@@ -147,13 +147,13 @@ public class GeoJobService extends JobService {
             Gson gson = new Gson();
             ActivationsResponse response = gson.fromJson(result, ActivationsResponse.class);
 
-            EasyLogger.toast(this, "Finished parsing, found " + response.data.length + " nearby geofences");
+           // EasyLogger.toast(this, "Finished parsing, found " + response.data.length + " nearby geofences");
             // Toast.makeText(ActivationService.this, "Finished parsing " + response.data.length, Toast.LENGTH_LONG).show();
             return response;
         }
         catch(Exception es){
             EasyLogger.log("error parsing location " + es.toString());
-            EasyLogger.toast(this, "Exception getting location " + es.toString());
+          //  EasyLogger.toast(this, "Exception getting location " + es.toString());
             //   Toast.makeText(getApplicationContext(), "Exception getting location " + es.toString(), Toast.LENGTH_LONG).show();
         }
         return null;
@@ -167,7 +167,7 @@ public class GeoJobService extends JobService {
 
         int lastEnteredId = prefs.getInt("last_geofence_id", -1);
 
-        EasyLogger.toast(getApplicationContext(), "Last registered geofence id" + lastEnteredId + ". This one is " + location.id);
+       // EasyLogger.toast(getApplicationContext(), "Last registered geofence id" + lastEnteredId + ". This one is " + location.id);
         // Toast.makeText(getApplicationContext(), "Last entered " + lastEnteredId + " vs " + location.id, Toast.LENGTH_LONG).show();
         return (lastEnteredId == location.id);
 
@@ -198,7 +198,7 @@ public class GeoJobService extends JobService {
         SharedPreferences prefs  = this.getApplicationContext().getSharedPreferences("geofences", Context.MODE_PRIVATE);
         SharedPreferences.Editor editPrefs = prefs.edit();
         editPrefs.putInt("last_geofence_id", -1);
-        EasyLogger.toast(getApplicationContext(), "left geofence");
+       // EasyLogger.toast(getApplicationContext(), "left geofence");
         editPrefs.commit();
 
         return true;
@@ -230,12 +230,12 @@ public class GeoJobService extends JobService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         float dist = (float) (earthRadius * c);
 
-        EasyLogger.toast(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
-        EasyLogger.saveForViewing(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius + " (Checked against " + " lat" + currentLocation.getLatitude() +", lng "+ currentLocation.getLongitude()+")");
+       // EasyLogger.toast(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
+      //  EasyLogger.saveForViewing(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius + " (Checked against " + " lat" + currentLocation.getLatitude() +", lng "+ currentLocation.getLongitude()+")");
 
         boolean result = dist <= (float) geofence.radius;
 
-        EasyLogger.toast(this, "In Geofence? "+String.valueOf(result));
+      //  EasyLogger.toast(this, "In Geofence? "+String.valueOf(result));
 
         return result;
     }
@@ -274,7 +274,7 @@ public class GeoJobService extends JobService {
         //cancel already displayed notification
         if(!inRadius(closest, currentLocation)){
             if(alreadyInGeofence(closest)){
-                EasyLogger.toast(this, "Exited geofence " + closest.name);
+               // EasyLogger.toast(this, "Exited geofence " + closest.name);
                 SendNotification nm = new SendNotification(getApplicationContext(), null, this);
                  int displayedNotification = nm.getPendingNotificationId();
                 if(displayedNotification!=-1)
@@ -287,7 +287,7 @@ public class GeoJobService extends JobService {
 
         if(alreadyInGeofence(closest)){
 
-            EasyLogger.toast(getApplicationContext(), "Already in geofence");
+          //  EasyLogger.toast(getApplicationContext(), "Already in geofence");
             return;
         }
 

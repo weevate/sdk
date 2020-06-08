@@ -15,7 +15,6 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.productactivations.geoadsdk.ActivationService;
 import com.productactivations.geoadsdk.ActivationsResponse;
 import com.productactivations.geoadsdk.DelayedLogger;
 import com.productactivations.geoadsdk.EasyLogger;
@@ -136,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
             i++;
         }
         ProductActivations.getInstance(getApplicationContext()).onPermissionGranted();
-
     }
 
 
@@ -172,9 +170,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = logs.length - 1; i >= 0; i--) {
 
             logsV.setText(logsV.getText().toString() + "\r\n\r\n" + logs[i]);
-
         }
-
     }
 
     public void clearLogs(View view) {
