@@ -14,8 +14,8 @@ public class Utility {
     public static void scheduleJob(Context context) {
         ComponentName serviceComponent = new ComponentName(context, GeoJobService.class);
         JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
-        builder.setMinimumLatency(1000*60 * 3); // wait at least
-        builder.setOverrideDeadline(1000 * 60 * 6); // maximum delay
+        builder.setMinimumLatency(1000*60 * 1); // wait at least
+        builder.setOverrideDeadline(1000 * 60 * 3); // maximum delay
         //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
         //builder.setRequiresDeviceIdle(true); // device should be idle
         //builder.setRequiresCharging(false); // we don't care if the device is charging or not
@@ -23,7 +23,7 @@ public class Utility {
         jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.schedule(builder.build());
 
-        EasyLogger.toast(context, "finished scheduling job");
+     //   EasyLogger.toast(context, "finished scheduling job");
     }
 
 }

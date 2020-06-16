@@ -31,13 +31,14 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         Context ctx;
         String message;
         SdkNotification notification;
-        GeoJobService service;
+        SdkNotificationResultListener  service;
 
 
-        public SendNotification(Context context, SdkNotification notification, GeoJobService service) {
+        public SendNotification(Context context, SdkNotification notification, SdkNotificationResultListener service) {
             super();
             this.ctx = context;
             this.notification = notification;
+            this.service = service;
 
         }
 
@@ -103,12 +104,14 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
     }
 
+    //@Todo there is no need to fetch the bitmap from the server first before checking if notification has been delivered before
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void sendNotification(Bitmap largeIcon){
 
         if(hasNotBeenDeliveredToday(notification.id)){
 
             EasyLogger.toast(ctx, "Cancellilng delivery");
+            service.onNotificationNotSent();
             return;
         }
 
@@ -131,7 +134,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         NotificationManager mNotificationManager;
 
         mBuilder = new NotificationCompat.Builder(ctx);
-        mBuilder.setSmallIcon(R.drawable.logo);
+        mBuilder.setSmallIcon(R.drawable.weevate_36_36);
         mBuilder.setContentTitle(notification.subject)
                 .setLargeIcon(largeIcon)
                 .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(largeIcon))
@@ -162,7 +165,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         //EasyLogger.toast(ctx, "Flashed notification"+id);
         saveNotificationId(id);
         mNotificationManager.notify(id /* Request Code */, notif);
-        service.finishJob();
+        service.onNotificationSent();
 
     }
 
@@ -206,16 +209,16 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         EasyLogger.toast(ctx, "Time passed in millis " + timeElapsed);
 
-        int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
+        // int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
 
-        EasyLogger.toast(ctx, "Hours passed since note was delivered " + hoursPassed);
+        int minutesPassed  = (int) (((timeElapsed/1000)/60));
 
-        boolean hasBeenDelivered = hoursPassed < 24;
+        EasyLogger.toast(ctx, "Minutes passed since note was delivered " + minutesPassed);
+
+        boolean hasBeenDelivered =  minutesPassed < 20;
 
         EasyLogger.toast(ctx, "Has note been delivered today? " + String.valueOf(hasBeenDelivered));
         return hasBeenDelivered;
-
-
     }
 
 

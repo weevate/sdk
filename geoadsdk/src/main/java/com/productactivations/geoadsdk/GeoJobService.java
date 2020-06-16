@@ -33,7 +33,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class GeoJobService extends JobService {
+public class GeoJobService extends JobService implements SdkNotificationResultListener {
 
 
 
@@ -44,8 +44,9 @@ public class GeoJobService extends JobService {
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(1000);
-        locationRequest.setFastestInterval(500);
+        locationRequest.setNumUpdates(1);
+       // locationRequest.setInterval(1000);
+       // locationRequest.setFastestInterval(500);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         return locationRequest;
@@ -75,6 +76,8 @@ public class GeoJobService extends JobService {
 
 
 
+        ActivationsResponse nearbyNotifications;
+        Location mLastLocation;
 
         private void doJob(){
             String jsonData = "";
@@ -86,13 +89,18 @@ public class GeoJobService extends JobService {
 
             LocationRequest mLocationRequest = createLocationRequest();
 
+
+
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
 
             mFusedLocationClient.requestLocationUpdates(
                     mLocationRequest, new LocationCallback(){
                         @Override
                         public void onLocationResult(LocationResult locationResult) {
-                            final Location mLastLocation = locationResult.getLastLocation();
+
+
+                            mLastLocation = locationResult.getLastLocation();
 
                           //  EasyLogger.toast(GeoJobService.this,  "Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
 
@@ -113,14 +121,15 @@ public class GeoJobService extends JobService {
                                 }
 
 
+
                                 @Override
                                 public void onPostExecute(String result){
                                     //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
                                     if(result!=null && result.indexOf("data") > 0 ){
-                                        //EasyLogger.toast(getApplicationContext(), result);
-                                        ActivationsResponse response  = stringToResponse(result);
-                                        registerNotifications(response, mLastLocation);
+                                     //   EasyLogger.toast(getApplicationContext(), result);
+                                        nearbyNotifications  = stringToResponse(result);
+                                        registerNotifications(nearbyNotifications, mLastLocation);
                                     }
                                 }
                             }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
@@ -153,9 +162,7 @@ public class GeoJobService extends JobService {
         }
         catch(Exception es){
             EasyLogger.log("error parsing location " + es.toString());
-          //  EasyLogger.toast(this, "Exception getting location " + es.toString());
-            //   Toast.makeText(getApplicationContext(), "Exception getting location " + es.toString(), Toast.LENGTH_LONG).show();
-        }
+                }
         return null;
     }
 
@@ -208,10 +215,11 @@ public class GeoJobService extends JobService {
 
     public boolean inRadius(PLocation geofence, Location currentLocation){
 
-        Log.d("calc distance to " + geofence.name ,  geofence.latitude + ", long" + geofence.longitude + " vs " + currentLocation.getLatitude() + ": " + currentLocation.getLongitude());
-       if(geofence.radius < 100){
+        if(geofence.radius < 100){
             geofence.radius = 100;
         }
+
+       geofence.radius = 10;
 
 
 
@@ -230,8 +238,8 @@ public class GeoJobService extends JobService {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         float dist = (float) (earthRadius * c);
 
-       // EasyLogger.toast(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
-      //  EasyLogger.saveForViewing(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius + " (Checked against " + " lat" + currentLocation.getLatitude() +", lng "+ currentLocation.getLongitude()+")");
+      //  EasyLogger.toast(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
+        EasyLogger.saveForViewing(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius + " (Checked against " + " lat" + currentLocation.getLatitude() +", lng "+ currentLocation.getLongitude()+")");
 
         boolean result = dist <= (float) geofence.radius;
 
@@ -246,7 +254,9 @@ public class GeoJobService extends JobService {
 
     private void sendNotification(SdkNotification notification){
         try {
-            new SendNotification(this, notification, this).execute("");
+          SendNotification sendNotification =  new SendNotification(this, notification, this);
+          sendNotification.execute("");
+
         }
         catch(Exception es){
 
@@ -255,12 +265,15 @@ public class GeoJobService extends JobService {
 
     }
 
+
+
+    int attemptsToSendNotification = 0;
     public void registerNotifications(ActivationsResponse response,  Location currentLocation){
 
 
-        // sendNotification(response.data[0].notifications[0]);
         PLocation closest = response.data[0];
 
+      //  EasyLogger.toast(getApplicationContext(), " Closest " + closest.name+ " has " + closest.notifications.length);
 
         if(closest.notifications.length < 1){
 
@@ -274,7 +287,7 @@ public class GeoJobService extends JobService {
         //cancel already displayed notification
         if(!inRadius(closest, currentLocation)){
             if(alreadyInGeofence(closest)){
-               // EasyLogger.toast(this, "Exited geofence " + closest.name);
+                EasyLogger.toast(this, "Exited geofence " + closest.name);
                 SendNotification nm = new SendNotification(getApplicationContext(), null, this);
                  int displayedNotification = nm.getPendingNotificationId();
                 if(displayedNotification!=-1)
@@ -287,56 +300,31 @@ public class GeoJobService extends JobService {
 
         if(alreadyInGeofence(closest)){
 
-          //  EasyLogger.toast(getApplicationContext(), "Already in geofence");
+            EasyLogger.toast(getApplicationContext(), "Already in geofence");
+            finishJob();
             return;
         }
 
         setGeofence(closest);
-        sendNotification(closest.notifications[0]);
+        EasyLogger.toast(getApplicationContext(), "Attempt to send notifiation is " + attemptsToSendNotification);
+        sendNotification(closest.notifications[attemptsToSendNotification]);
 
 
 
+    }
 
-        /*
-       ArrayList<Geofence> geofenceList = getGeofences(response);
-        if(geofenceList.size() < 1){
-            EasyLogger.log("No notifications set");
-            return;
-        }
-       geofencingClient.addGeofences(getGeofenceingRequest(geofenceList), getGeofencePendingIntent()).addOnSuccessListener(new Executor() {
-           @Override
-           public void execute(Runnable command) {
-               EasyLogger.log("Inside executor");
-           }
-       }, new OnSuccessListener<Void>() {
-           @Override
-           public void onSuccess(Void aVoid) {
-               Toast.makeText(ActivationService.this, "Success adding", Toast.LENGTH_LONG).show();
-           }
-       }).addOnFailureListener(new OnFailureListener() {
-           @Override
-           public void onFailure(@NonNull Exception e) {
-               LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-               if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                   Toast.makeText(ActivationService.this, "GPS Provider not avaialeble" + e.toString(), Toast.LENGTH_LONG).show();
-               }
-               if (!manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-                   Toast.makeText(ActivationService.this, "Network provider not avaialeble" + e.toString(), Toast.LENGTH_LONG).show();
-               }
-               Toast.makeText(ActivationService.this, "failure adding " + e.toString(), Toast.LENGTH_LONG).show();
-           }
-       }).addOnCompleteListener(new OnCompleteListener<Void>() {
-           @Override
-           public void onComplete(@NonNull Task<Void> task) {
-               Toast.makeText(ActivationService.this, "Geofence completed " , Toast.LENGTH_LONG).show();
-           }
-       });
-        Toast.makeText(ActivationService.this, "Added geofence", Toast.LENGTH_LONG).show();
-*/
+
+    public void registerNextNotification(ActivationsResponse response,  Location currentLocation){
+
+        PLocation closest = response.data[0];
+
+        EasyLogger.toast(getApplicationContext(), "delivering notification " + attemptsToSendNotification);
+        sendNotification(closest.notifications[attemptsToSendNotification]);
+
     }
 
     public void finishJob(){
-
+        EasyLogger.toast(getApplicationContext(), "Finished job");
         this.jobFinished(this.params, true);
     }
 
@@ -396,6 +384,32 @@ public class GeoJobService extends JobService {
         }
 
         return geofenceList;
+    }
+
+    @Override
+    public void onNotificationNotSent(){
+
+        EasyLogger.toast(getApplicationContext(), "Notification not sent " + nearbyNotifications.data[0].notifications.length);
+        attemptsToSendNotification+=1;
+
+        EasyLogger.toast(getApplicationContext(), "Attempts " + attemptsToSendNotification + ", length "+ nearbyNotifications.data[0].notifications.length);
+        if(nearbyNotifications.data[0].notifications.length > attemptsToSendNotification){
+            EasyLogger.toast(getApplicationContext(), "Delivered this note before; unto the next");
+            registerNextNotification(nearbyNotifications, mLastLocation);
+        }        
+
+        else{
+            finishJob();
+            EasyLogger.toast(getApplicationContext(), "No more nearby locations");
+        }
+
+
+    }
+
+
+    public void onNotificationSent(){
+
+        finishJob();
     }
 
 
