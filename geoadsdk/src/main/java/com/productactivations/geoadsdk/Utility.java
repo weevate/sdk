@@ -1,9 +1,12 @@
 package com.productactivations.geoadsdk;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
@@ -24,6 +27,16 @@ public class Utility {
         jobScheduler.schedule(builder.build());
 
      //   EasyLogger.toast(context, "finished scheduling job");
+    }
+
+
+    public static void scheduleAlarm(Context context){
+
+
+        Intent intent = new Intent(context, GeoService.class);
+        PendingIntent pintent = PendingIntent.getService(context, 0, intent, 0);
+        AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, 1000*60, 1000 * 60 * 10, pintent);
     }
 
 }

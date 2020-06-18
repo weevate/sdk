@@ -44,9 +44,9 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setNumUpdates(1);
-       // locationRequest.setInterval(1000);
-       // locationRequest.setFastestInterval(500);
+        locationRequest.setNumUpdates(20);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(2000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         return locationRequest;
@@ -59,6 +59,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
         @Override
         public boolean onStartJob(JobParameters params) {
+            this.params = params;
            // EasyLogger.toast(getApplicationContext(), "Started execution of job");
             doJob();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -215,11 +216,11 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
     public boolean inRadius(PLocation geofence, Location currentLocation){
 
-        if(geofence.radius < 100){
-            geofence.radius = 100;
+        if(geofence.radius < 1){
+            geofence.radius = 10;
         }
 
-       geofence.radius = 10;
+       geofence.radius = 50;
 
 
 
@@ -301,7 +302,9 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         if(alreadyInGeofence(closest)){
 
             EasyLogger.toast(getApplicationContext(), "Already in geofence");
-            finishJob();
+
+            onNotificationNotSent();
+           // finishJob();
             return;
         }
 
@@ -366,6 +369,8 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                 loc.radius = 100;
             }
 
+            loc.radius =5;
+
             geofenceList.add(new Geofence.Builder()
                     // Set the request ID of the geofence. This is a string to identify this
                     // geofence.
@@ -402,8 +407,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
             finishJob();
             EasyLogger.toast(getApplicationContext(), "No more nearby locations");
         }
-
-
     }
 
 

@@ -31,6 +31,11 @@
             android:exported="true"/>
 
 
+        <service android:name="com.productactivations.geoadsdk.GeoService"
+            android:enabled="true"
+            android:exported="true"/>
+
+
         <receiver android:name="com.productactivations.geoadsdk.GeofenceBroadcastReceiver">
         <intent-filter>
             <action android:name="android.intent.action.BOOT_COMPLETED" />

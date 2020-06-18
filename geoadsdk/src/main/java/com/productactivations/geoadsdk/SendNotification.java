@@ -81,7 +81,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
     private void savePendingUrlToPreferences(){
         SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
         SharedPreferences.Editor editPrefs = prefs.edit();
-        editPrefs.putInt("pending_notification_id", notification.id);
+        editPrefs.putInt("pending_notification_id", notification.sdkNotificationId);
         editPrefs.putString("pending_package_name", ctx.getPackageName());
         editPrefs.commit();
     }
@@ -108,7 +108,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void sendNotification(Bitmap largeIcon){
 
-        if(hasNotBeenDeliveredToday(notification.id)){
+        if(hasNotBeenDeliveredToday(notification.sdkNotificationId)){
 
             EasyLogger.toast(ctx, "Cancellilng delivery");
             service.onNotificationNotSent();
@@ -117,10 +117,10 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         EasyLogger.toast(ctx, "Not cancelling notification");
 
-        saveDeliveredNotification(notification.id);
+        saveDeliveredNotification(notification.sdkNotificationId);
 
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
-        String url = Config.url+"/api/v1/geofences/performed_click/"+notification.id+"/"+ctx.getPackageName();
+        String url = Config.url+"/api/v1/geofences/performed_click/"+notification.sdkNotificationId+"/"+ctx.getPackageName();
 
         EasyLogger.toast(ctx, "Url posted to is " + url);
         Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -181,7 +181,6 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         EasyLogger.toast(ctx, "Saving " + key + " with value " + value);
         editPrefs.putString(key, value);
         editPrefs.commit();
-
     }
 
 
