@@ -219,9 +219,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
             geofence.radius = 10;
         }
 
-        geofence.radius = 10;
-
-
         double lat1 = geofence.latitude;
         double lng1 = geofence.longitude;
 
