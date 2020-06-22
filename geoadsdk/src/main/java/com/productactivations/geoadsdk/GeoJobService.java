@@ -44,7 +44,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setNumUpdates(20);
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(2000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -220,8 +219,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
             geofence.radius = 10;
         }
 
-       geofence.radius = 50;
-
+        geofence.radius = 10;
 
 
         double lat1 = geofence.latitude;
@@ -273,16 +271,12 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
 
         PLocation closest = response.data[0];
-
       //  EasyLogger.toast(getApplicationContext(), " Closest " + closest.name+ " has " + closest.notifications.length);
 
         if(closest.notifications.length < 1){
-
-
             EasyLogger.toast(this, "This geofence has no notifications attached ");
             //         registerNotifications(response, currentLocation, count);
             return;
-
         }
 
         //cancel already displayed notification
@@ -303,7 +297,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
             EasyLogger.toast(getApplicationContext(), "Already in geofence");
 
-            onNotificationNotSent();
+            //onNotificationNotSent();
            // finishJob();
             return;
         }
