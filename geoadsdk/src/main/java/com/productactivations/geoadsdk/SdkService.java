@@ -43,6 +43,11 @@ public class SdkService  implements SdkNotificationResultListener{
     }
 
 
+    private Context getApplicationContext(){
+       return ctx;
+    }
+
+
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setNumUpdates(1);
@@ -195,11 +200,10 @@ public class SdkService  implements SdkNotificationResultListener{
 
     public boolean inRadius(PLocation geofence, Location currentLocation){
 
-        if(geofence.radius < 100){
-            geofence.radius = 100;
+        if(geofence.radius < 50){
+            geofence.radius = 50;
         }
 
-        geofence.radius = 10;
 
 
 
@@ -218,12 +222,12 @@ public class SdkService  implements SdkNotificationResultListener{
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         float dist = (float) (earthRadius * c);
 
-        //  EasyLogger.toast(this, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
+          EasyLogger.toast(getApplicationContext(), "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius);
         EasyLogger.saveForViewing(ctx, "Current Radius to location ("+geofence.name+") is "  + dist + " metres while required: <" + geofence.radius + " (Checked against " + " lat" + currentLocation.getLatitude() +", lng "+ currentLocation.getLongitude()+")");
 
         boolean result = dist <= (float) geofence.radius;
 
-        //  EasyLogger.toast(this, "In Geofence? "+String.valueOf(result));
+          EasyLogger.toast(getApplicationContext(), "In Geofence? "+String.valueOf(result));
 
         return result;
     }
@@ -253,7 +257,7 @@ public class SdkService  implements SdkNotificationResultListener{
 
         PLocation closest = response.data[0];
 
-        //  EasyLogger.toast(getApplicationContext(), " Closest " + closest.name+ " has " + closest.notifications.length);
+   EasyLogger.toast(getApplicationContext(), " Closest " + closest.name+ " has " + closest.notifications.length);
 
         if(closest.notifications.length < 1){
 

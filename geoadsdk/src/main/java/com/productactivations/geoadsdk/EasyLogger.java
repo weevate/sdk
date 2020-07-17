@@ -27,20 +27,20 @@ public class EasyLogger {
     }
 
     public static void toast(Context context, String message){
-        //save(message, context);
+        save(message, context);
         //Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     public static void saveForViewing(Context context, String message){
 
-    /*    String line = getDateNow() + ": " + message;
+    String line = getDateNow() + ": " + message;
         SharedPreferences preferences =  context.getSharedPreferences("productactivations", Context.MODE_PRIVATE);
 
 
         SharedPreferences.Editor pref = preferences.edit();
         pref.putString("display", line);
         pref.commit();
- */
+
     }
 
 
