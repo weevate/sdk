@@ -368,7 +368,7 @@ public class SdkService  implements SdkNotificationResultListener{
     public String  performPostCall(String requestURL,
                                    String jsonData) {
 
-        Log.d("performing call", "performing call");
+      //  Log.d("performing call", "performing call");
 
         URL url;
         String resp = "";
@@ -407,7 +407,7 @@ public class SdkService  implements SdkNotificationResultListener{
                 System.out.println(response.toString());
                 resp = response.toString();
 
-                Log.d("Result from posting ", resp);
+             //   Log.d("Result from posting ", resp);
             }
 
         } catch (Exception e) {

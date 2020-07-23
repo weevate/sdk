@@ -474,7 +474,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                 System.out.println(response.toString());
                 resp = response.toString();
 
-                Log.d("Result from posting ", resp);
+              //  Log.d("Result from posting ", resp);
             }
 
         } catch (Exception e) {

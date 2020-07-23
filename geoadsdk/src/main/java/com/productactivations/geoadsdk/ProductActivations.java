@@ -21,6 +21,8 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -75,14 +77,24 @@ public class ProductActivations {
             final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
 
 
-            new AsyncTask<String, String, String>(){
+            new AsyncTask<Boolean, Boolean, Boolean>(){
 
                 @Override
-                protected String doInBackground(String... strings) {
-                    performPostCall(url, deviceData);
-                    return null;
+                protected Boolean doInBackground(Boolean... strings) {
+                 boolean showRunningToast=   registerDevice(url, deviceData);
+                    return showRunningToast;
                 }
-            }.execute("");
+
+
+                @Override
+                public void onPostExecute(Boolean showMessage){
+
+                    if(showMessage){
+
+                        Toast.makeText(appContext, "Weevate is running", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }.execute(true);
 
 
 
@@ -110,21 +122,6 @@ public class ProductActivations {
 
 
 
-        /*   Intent i2 = new Intent(appContext, ActivationService.class);
-
-            appContext.startService(i2);
-
-            EasyLogger.log("Started service" );
-            AlarmManager am = (AlarmManager)this.appContext.getSystemService(ALARM_SERVICE);
-            Intent i = new Intent(this.appContext, AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getService(appContext, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
-
-            Calendar t = Calendar.getInstance();
-            t.setTimeInMillis(System.currentTimeMillis());
-
-            int interval =  120000;
-            am.setRepeating(AlarmManager.RTC_WAKEUP, t.getTimeInMillis(), interval, pendingIntent);
-           // EasyLogger.log("Started alarm"); */
 
         }
 
@@ -158,7 +155,7 @@ public class ProductActivations {
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public String  performPostCall(String requestURL,
+    public boolean  registerDevice(String requestURL,
                                    String jsonData) {
 
         Log.d("performing call", "performing call");
@@ -200,6 +197,20 @@ public class ProductActivations {
                 System.out.println(response.toString());
                 resp = response.toString();
 
+
+                try {
+                    Gson json = new Gson();
+                    DeviceRegistrationResponse mResponse = json.fromJson(resp, DeviceRegistrationResponse.class);
+
+                    if(mResponse.isLive == "false"){
+
+                        return true;
+                      //  Toast.makeText(appContext, "Weevate is running!", Toast.LENGTH_LONG).show();
+                    }
+                }
+                catch(Exception es){
+                    Log.d("Decode Json error", es.getLocalizedMessage());
+                }
                 Log.d("Result from posting ", resp);
             }
 
@@ -207,7 +218,7 @@ public class ProductActivations {
             Log.d("Error posting ", e.toString());
         }
 
-        return resp;
+        return false;
     }
 
 
@@ -216,5 +227,13 @@ public class ProductActivations {
     public static ProductActivations getInstance(Context appContext){
         if(instance==null) instance = new ProductActivations(appContext);
         return instance;
+    }
+
+
+    private class DeviceRegistrationResponse {
+      public String success;
+      public  String existed;
+      public  String data;
+      public String isLive;
     }
 }
