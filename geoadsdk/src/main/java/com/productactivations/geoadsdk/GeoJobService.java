@@ -11,6 +11,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
@@ -103,13 +104,18 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                             mLastLocation = locationResult.getLastLocation();
 
                           //  EasyLogger.toast(GeoJobService.this,  "Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
+                            String packageName = getApplicationContext().getPackageName();
+
+
+                            String android_id = Settings.Secure.getString(getApplicationContext().getContentResolver(),
+                                    Settings.Secure.ANDROID_ID);
+
 
                             String json = "{ \n" +
                                     "\"Latitude\":\""+mLastLocation.getLatitude()+"\",\n" +
                                     "\"Longitude\":\""+mLastLocation.getLongitude()+"\",\n" +
-                                    "\"DeviceId\":\"484848484848\"\n" +
-                                    "}";
-
+                                    "\"DeviceId\":\""+android_id+"\"\n" +
+                                    "\"PackageName\":\""+packageName+"\" }";
 
 
                             new doPostRequest(){
@@ -268,7 +274,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
 
         PLocation closest = response.data[0];
-      //  EasyLogger.toast(getApplicationContext(), " Closest " + closest.name+ " has " + closest.notifications.length);
+        EasyLogger.toast(getApplicationContext(), " Closest " + closest.name+ " has " + closest.notifications.length);
 
         if(closest.notifications.length < 1){
             EasyLogger.toast(this, "This geofence has no notifications attached ");
