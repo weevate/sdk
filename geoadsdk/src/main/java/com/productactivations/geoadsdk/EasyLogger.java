@@ -28,6 +28,7 @@ public class EasyLogger {
 
     public static void toast(Context context, String message){
         save(message, context);
+        log(message);
         //Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 

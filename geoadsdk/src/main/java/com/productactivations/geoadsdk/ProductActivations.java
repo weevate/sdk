@@ -72,7 +72,7 @@ public class ProductActivations {
         final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
-        Log.d("JSON_LOAD", deviceData);
+       // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
 
@@ -113,11 +113,12 @@ public class ProductActivations {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
                 Utility.scheduleJob(appContext);
+
+                EasyLogger.toast(appContext,"Started scheduler");
             }
             catch(Exception es){
                 EasyLogger.toast(appContext, "Error starting job  " + es.getMessage());
             }
-            EasyLogger.toast(appContext,"Started scheduler");
         }
 
 

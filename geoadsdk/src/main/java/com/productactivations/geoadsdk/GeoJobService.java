@@ -42,6 +42,10 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
     private GeofencingClient geofencingClient ;
     private JobParameters params;
 
+    long REQUEST_INTERVAL_MILLISECONDS = 6000;
+
+    long lastRequestTime = System.currentTimeMillis();
+
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
@@ -60,7 +64,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         @Override
         public boolean onStartJob(JobParameters params) {
             this.params = params;
-           // EasyLogger.toast(getApplicationContext(), "Started execution of job");
+            EasyLogger.toast(getApplicationContext(), "Started execution of job");
             doJob();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Utility.scheduleJob(getApplicationContext()); // reschedule the job
@@ -83,7 +87,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         private void doJob(){
             String jsonData = "";
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                // performPostCall("api/v1/geofences/get_geofence", jsonData);
+                // Call("api/v1/geofences/get_geofence", jsonData);
             }
 
           //  EasyLogger.toast(this, "Started service ");
@@ -94,16 +98,26 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-
+            lastRequestTime = System.currentTimeMillis();
             mFusedLocationClient.requestLocationUpdates(
                     mLocationRequest, new LocationCallback(){
                         @Override
                         public void onLocationResult(LocationResult locationResult) {
 
 
+                            long timeElapsed = System.currentTimeMillis()- lastRequestTime;
+
+                            if(timeElapsed < REQUEST_INTERVAL_MILLISECONDS) {
+                              //  EasyLogger.toast(getApplicationContext(),"Skipping "  + timeElapsed);
+                                return;
+                            }
+
+                            EasyLogger.toast(getApplicationContext(),"Sending "  + timeElapsed);
+
+                            lastRequestTime = System.currentTimeMillis();
                             mLastLocation = locationResult.getLastLocation();
 
-                          //  EasyLogger.toast(GeoJobService.this,  "Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
+                            EasyLogger.toast(GeoJobService.this,  " Requested geofence: Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
                             String packageName = getApplicationContext().getPackageName();
 
 
@@ -114,16 +128,17 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                             String json = "{ \n" +
                                     "\"Latitude\":\""+mLastLocation.getLatitude()+"\",\n" +
                                     "\"Longitude\":\""+mLastLocation.getLongitude()+"\",\n" +
-                                    "\"DeviceId\":\""+android_id+"\"\n" +
+                                    "\"DeviceId\":\""+android_id+"\",\n" +
                                     "\"PackageName\":\""+packageName+"\" }";
 
-
+                            //EasyLogger.toast(getApplicationContext(), "Content : " + json);
                             new doPostRequest(){
 
                                 @Override
                                 public void onPreExecute(){
                                     //     Toast.makeText(getApplicationContext(), "About to start ", Toast.LENGTH_LONG).show();
 
+                                    EasyLogger.toast(getApplicationContext(), "Requested geofences");
                                 }
 
 
@@ -133,7 +148,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                                     //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
                                     if(result!=null && result.indexOf("data") > 0 ){
-                                     //   EasyLogger.toast(getApplicationContext(), result);
+                                        EasyLogger.toast(getApplicationContext(),  "Result geofences " +result);
                                         nearbyNotifications  = stringToResponse(result);
                                         registerNotifications(nearbyNotifications, mLastLocation);
                                     }
@@ -441,7 +456,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
     public String  performPostCall(String requestURL,
                                    String jsonData) {
 
-        Log.d("performing call", "performing call");
 
         URL url;
         String resp = "";
@@ -470,6 +484,9 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                 os.write(input, 0, input.length);
             }
 
+            catch(Exception es){
+                EasyLogger.toast(getApplicationContext(), "Error reading result " + es.getMessage());
+            }
             try(BufferedReader br = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), "utf-8"))) {
                 StringBuilder response = new StringBuilder();
@@ -480,11 +497,10 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                 System.out.println(response.toString());
                 resp = response.toString();
 
-              //  Log.d("Result from posting ", resp);
             }
 
         } catch (Exception e) {
-            Log.d("Error posting ", e.toString());
+            EasyLogger.toast(getApplicationContext(), "Error makign request " +e.toString());
         }
 
         return resp;
