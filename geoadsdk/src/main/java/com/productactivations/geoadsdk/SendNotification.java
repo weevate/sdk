@@ -14,13 +14,17 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -122,6 +126,18 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
         String url = Config.url+"/api/v1/geofences/performed_click/"+notification.sdkNotificationId+"/"+ctx.getPackageName();
 
+        String delivery_url = Config.url+"/api/v1/geofences/performed_delivery/"+notification.sdkNotificationId+"/"+ctx.getPackageName();
+
+        new doGetRequest(){
+
+            @Override
+            public void onPreExecute(){
+                EasyLogger.toast(ctx, "About to report delivery");
+            }
+
+
+        }.execute(delivery_url);
+
         EasyLogger.toast(ctx, "Url posted to is " + url);
         Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 
@@ -208,14 +224,14 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         EasyLogger.toast(ctx, "Time passed in millis " + timeElapsed);
 
-        int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
+      //  int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
 
-       // int minutesPassed  = (int) (((timeElapsed/1000)/60));
+        int minutesPassed  = (int) (((timeElapsed/1000)));
 
 
-        boolean hasBeenDelivered =  hoursPassed < 24;
+        boolean hasBeenDelivered =  minutesPassed < 24;
 
-       // EasyLogger.toast(ctx, "Minutes passed since note was delivered " + minutesPassed);
+        EasyLogger.toast(ctx, "seconds passed since note was delivered " + minutesPassed);
 
        // EasyLogger.toast(ctx, "Has note been delivered today? " + String.valueOf(hasBeenDelivered));
         return hasBeenDelivered;
@@ -250,4 +266,77 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         }
 
 
+
+        //Anti Pattern
+        class doGetRequest extends AsyncTask<String, String, String> {
+
+
+            @Override
+            protected String doInBackground(String... strings) {
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    return performGetCall(strings[0]);
+                }
+
+                return null;
+            }
+
+
+            @Override
+            protected void onPostExecute(String result){
+
+                EasyLogger.toast(ctx, "Result from registering " + result);
+
+            }
+        }
+
+
+
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public String  performGetCall(String requestURL) {
+
+
+        URL url;
+        String resp = "";
+        try {
+            url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+
+            conn.setRequestProperty("Accept", "application/json");
+
+
+
+
+
+            conn.setDoOutput(true);
+
+
+
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), "utf-8"))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                System.out.println(response.toString());
+                resp = response.toString();
+
+            }
+
+        } catch (Exception e) {
+            EasyLogger.toast(ctx, "Error makign request " +e.toString());
+        }
+
+        return resp;
+    }
 }
+
+
+

@@ -63,6 +63,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
         @Override
         public boolean onStartJob(JobParameters params) {
+            preventCrashes();
             this.params = params;
             EasyLogger.toast(getApplicationContext(), "Started execution of job");
             doJob();
@@ -70,6 +71,17 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                 Utility.scheduleJob(getApplicationContext()); // reschedule the job
             }
             return true;
+        }
+
+
+        private void preventCrashes(){
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+
+                    System.exit(2);
+                }
+            });
         }
 
         @Override
@@ -108,7 +120,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                             long timeElapsed = System.currentTimeMillis()- lastRequestTime;
 
                             if(timeElapsed < REQUEST_INTERVAL_MILLISECONDS) {
-                              //  EasyLogger.toast(getApplicationContext(),"Skipping "  + timeElapsed);
+                                EasyLogger.toast(getApplicationContext(),"Skipping "  + timeElapsed);
                                 return;
                             }
 
@@ -117,7 +129,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                             lastRequestTime = System.currentTimeMillis();
                             mLastLocation = locationResult.getLastLocation();
 
-                            EasyLogger.toast(GeoJobService.this,  " Requested geofence: Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
+                            //EasyLogger.toast(GeoJobService.this,  " Requested geofence: Your location: lat  " + mLastLocation.getLatitude() + ",  long: "+ mLastLocation.getLongitude());
                             String packageName = getApplicationContext().getPackageName();
 
 
@@ -148,7 +160,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                                     //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
                                     if(result!=null && result.indexOf("data") > 0 ){
-                                        EasyLogger.toast(getApplicationContext(),  "Result geofences " +result);
+                                        EasyLogger.toast(getApplicationContext(),  "Result geofences " +result.length());
                                         nearbyNotifications  = stringToResponse(result);
                                         registerNotifications(nearbyNotifications, mLastLocation);
                                     }
@@ -260,7 +272,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
         boolean result = dist <= (float) geofence.radius;
 
-      //  EasyLogger.toast(this, "In Geofence? "+String.valueOf(result));
+      //  EasyLogger.toast(this,f "In Geofence? "+String.valueOf(result));
 
         return result;
     }
@@ -287,7 +299,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
     int attemptsToSendNotification = 0;
     public void registerNotifications(ActivationsResponse response,  Location currentLocation){
 
-
+        if(response.data.length < 1) return;
         PLocation closest = response.data[0];
         EasyLogger.toast(getApplicationContext(), " Closest " + closest.name+ " has " + closest.notifications.length);
 
