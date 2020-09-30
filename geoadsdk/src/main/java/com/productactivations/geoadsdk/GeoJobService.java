@@ -29,9 +29,12 @@ import com.google.gson.Gson;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class GeoJobService extends JobService implements SdkNotificationResultListener {
@@ -49,8 +52,8 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(2000);
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         return locationRequest;
@@ -162,6 +165,8 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                                     if(result!=null && result.indexOf("data") > 0 ){
                                         EasyLogger.toast(getApplicationContext(),  "Result geofences " +result.length());
                                         nearbyNotifications  = stringToResponse(result);
+
+                                        nearbyNotifications =  treatNotifications(nearbyNotifications);
                                         registerNotifications(nearbyNotifications, mLastLocation);
                                     }
                                 }
@@ -179,6 +184,33 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         }
 
 
+        //closest location notiications with locationless notifications
+        private ActivationsResponse treatNotifications(ActivationsResponse nearbyNotifications){
+
+            List<SdkNotification> notifications = new ArrayList<SdkNotification>();
+
+            notifications.addAll(Arrays.asList(nearbyNotifications.data[0].notifications));
+
+            if(nearbyNotifications.data.length > 1){
+
+
+                for(int j = 0; j < nearbyNotifications.data[1].notifications.length; j++){
+
+                    notifications.add(nearbyNotifications.data[1].notifications[j]);
+                }
+
+                nearbyNotifications.data[0].name = nearbyNotifications.data[1].name + " (Plus locationless notifications)";
+            }
+
+            nearbyNotifications.data[0].notifications = new SdkNotification[notifications.size()];
+
+            int counter = 0;
+            for(SdkNotification notification: notifications){
+                nearbyNotifications.data[0].notifications[counter++] = notification;
+            }
+
+             return nearbyNotifications;
+        }
 
     private int GEOFENCE_EXPIRES_IN = 1000 * 60 * 30;
 
@@ -323,9 +355,9 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
             return;
         }
 
-        if(alreadyInGeofence(closest)){
+        if(alreadyInGeofence(closest) && closest.id!=-1){
 
-            EasyLogger.toast(getApplicationContext(), "Already in geofence");
+            EasyLogger.toast(getApplicationContext(), "Already in geofence "+closest.id);
 
             //onNotificationNotSent();
            // finishJob();
@@ -334,9 +366,8 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
         setGeofence(closest);
         EasyLogger.toast(getApplicationContext(), "Attempt to send notifiation is " + attemptsToSendNotification);
+        if(closest.notifications.length > attemptsToSendNotification)
         sendNotification(closest.notifications[attemptsToSendNotification]);
-
-
 
     }
 
@@ -506,7 +537,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
-                System.out.println(response.toString());
                 resp = response.toString();
 
             }

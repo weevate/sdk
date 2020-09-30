@@ -224,16 +224,16 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         EasyLogger.toast(ctx, "Time passed in millis " + timeElapsed);
 
-      //  int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
+        int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
 
-        int minutesPassed  = (int) (((timeElapsed/1000)));
+        //int minutesPassed  = (int) (((timeElapsed/1000)));
 
 
-        boolean hasBeenDelivered =  minutesPassed < 24;
+        boolean hasBeenDelivered =  hoursPassed < 24;
 
-        EasyLogger.toast(ctx, "seconds passed since note was delivered " + minutesPassed);
+        EasyLogger.toast(ctx, "hours passed since note was delivered " + hoursPassed);
 
-       // EasyLogger.toast(ctx, "Has note been delivered today? " + String.valueOf(hasBeenDelivered));
+        //EasyLogger.toast(ctx, "Has note been delivered today? " + String.valueOf(hasBeenDelivered));
         return hasBeenDelivered;
     }
 

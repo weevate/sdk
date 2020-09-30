@@ -18,8 +18,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.gson.Gson;
 
@@ -82,6 +84,109 @@ public class ProductActivations {
                 @Override
                 protected Boolean doInBackground(Boolean... strings) {
                  boolean showRunningToast=   registerDevice(url, deviceData);
+                    return showRunningToast;
+                }
+
+
+                @Override
+                public void onPostExecute(Boolean showMessage){
+
+                    if(showMessage){
+
+                        Toast.makeText(appContext, "Weevate is running", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }.execute(true);
+
+
+
+        }
+        else{
+
+            Log.d("kdkd", "Call not made");
+        }
+    }
+
+
+
+    public void initialize(AppCompatActivity activity, String fcm_token){
+        ensureLocationEnabled(activity);
+        this.small_icon = small_icon;
+        String packageName  = this.appContext.getPackageName();
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 200);
+        } else {
+            ActivityCompat.requestPermissions(activity, new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 200);
+        }
+
+        String android_id = Settings.Secure.getString(activity.getApplicationContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+
+        String device_id = android_id;
+        final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+
+        EasyLogger.toast(appContext.getApplicationContext(), deviceData);
+        // Log.d("JSON_LOAD", deviceData);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+
+
+            new AsyncTask<Boolean, Boolean, Boolean>(){
+
+                @Override
+                protected Boolean doInBackground(Boolean... strings) {
+                    boolean showRunningToast=   registerDevice(url, deviceData);
+                    return showRunningToast;
+                }
+
+
+                @Override
+                public void onPostExecute(Boolean showMessage){
+
+                    if(showMessage){
+
+                        Toast.makeText(appContext, "Weevate is running", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }.execute(true);
+
+
+
+        }
+        else{
+
+            Log.d("kdkd", "Call not made");
+        }
+    }
+
+
+    public void initialize(FragmentActivity activity, String fcm_token){
+        ensureLocationEnabled(activity);
+        this.small_icon = small_icon;
+        String packageName  = this.appContext.getPackageName();
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 200);
+        } else {
+            ActivityCompat.requestPermissions(activity, new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 200);
+        }
+
+        String android_id = Settings.Secure.getString(activity.getApplicationContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+
+        String device_id = android_id;
+        final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+
+        EasyLogger.toast(appContext.getApplicationContext(), deviceData);
+        // Log.d("JSON_LOAD", deviceData);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+
+
+            new AsyncTask<Boolean, Boolean, Boolean>(){
+
+                @Override
+                protected Boolean doInBackground(Boolean... strings) {
+                    boolean showRunningToast=   registerDevice(url, deviceData);
                     return showRunningToast;
                 }
 
