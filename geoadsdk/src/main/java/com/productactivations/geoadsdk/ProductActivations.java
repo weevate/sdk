@@ -18,11 +18,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
-
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -57,7 +57,7 @@ public class ProductActivations {
 
     }
 
-    public void initialize(Activity activity, String fcm_token){
+    public void initialize(Activity activity){
         ensureLocationEnabled(activity);
         this.small_icon = small_icon;
         String packageName  = this.appContext.getPackageName();
@@ -109,7 +109,7 @@ public class ProductActivations {
 
 
 
-    public void initialize(AppCompatActivity activity, String fcm_token){
+    public void initialize(AppCompatActivity activity){
         ensureLocationEnabled(activity);
         this.small_icon = small_icon;
         String packageName  = this.appContext.getPackageName();
@@ -160,7 +160,7 @@ public class ProductActivations {
     }
 
 
-    public void initialize(FragmentActivity activity, String fcm_token){
+    public void initialize(FragmentActivity activity){
         ensureLocationEnabled(activity);
         this.small_icon = small_icon;
         String packageName  = this.appContext.getPackageName();
