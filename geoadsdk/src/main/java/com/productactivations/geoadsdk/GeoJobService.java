@@ -123,11 +123,11 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                             long timeElapsed = System.currentTimeMillis()- lastRequestTime;
 
                             if(timeElapsed < REQUEST_INTERVAL_MILLISECONDS) {
-                                EasyLogger.toast(getApplicationContext(),"Skipping "  + timeElapsed);
+                              //  EasyLogger.toast(getApplicationContext(),"Skipping "  + timeElapsed);
                                 return;
                             }
 
-                            EasyLogger.toast(getApplicationContext(),"Sending "  + timeElapsed);
+                          //  EasyLogger.toast(getApplicationContext(),"Sending "  + timeElapsed);
 
                             lastRequestTime = System.currentTimeMillis();
                             mLastLocation = locationResult.getLastLocation();
@@ -199,6 +199,10 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                     notifications.add(nearbyNotifications.data[1].notifications[j]);
                 }
 
+
+                //set closest displayed location to locationbased note, not locationless.
+                nearbyNotifications.data[0].longitude = nearbyNotifications.data[1].longitude;
+                nearbyNotifications.data[0].latitude = nearbyNotifications.data[1].latitude;
                 nearbyNotifications.data[0].name = nearbyNotifications.data[1].name + " (Plus locationless notifications)";
             }
 
@@ -366,8 +370,13 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
         setGeofence(closest);
         EasyLogger.toast(getApplicationContext(), "Attempt to send notifiation is " + attemptsToSendNotification);
-        if(closest.notifications.length > attemptsToSendNotification)
-        sendNotification(closest.notifications[attemptsToSendNotification]);
+        if(closest.notifications.length > attemptsToSendNotification) {
+            sendNotification(closest.notifications[attemptsToSendNotification]);
+        }
+        else{
+            attemptsToSendNotification = 0;
+        }
+
 
     }
 

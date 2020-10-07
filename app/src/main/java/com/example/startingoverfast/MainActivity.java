@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         coordinate = findViewById(R.id.coordinate);
         liveAction = findViewById(R.id.live_action);
 
-        ProductActivations.getInstance(getApplicationContext()).initialize(MainActivity.this, "NO NORE FCM");
+        ProductActivations.getInstance(getApplicationContext()).initialize(MainActivity.this);
 
         LocationRequest mLocationRequest = createLocationRequest();
 

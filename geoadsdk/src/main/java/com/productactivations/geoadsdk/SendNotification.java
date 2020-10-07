@@ -149,7 +149,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         NotificationCompat.Builder mBuilder;
         NotificationManager mNotificationManager;
 
-        mBuilder = new NotificationCompat.Builder(ctx);
+        mBuilder = new NotificationCompat.Builder(ctx, CHANNEL_ID);
         mBuilder.setSmallIcon(R.drawable.weevate_36_36);
         mBuilder.setContentTitle(notification.subject)
                 .setLargeIcon(largeIcon)
@@ -194,7 +194,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         String key = "n"+not_id;
         String value = "t"+System.currentTimeMillis();
 
-        EasyLogger.toast(ctx, "Saving " + key + " with value " + value);
+        EasyLogger.toast(ctx, "Saving " + key + " with value  as delivered. Will not deliver again till 24 hrs");
         editPrefs.putString(key, value);
         editPrefs.commit();
     }
