@@ -23,12 +23,12 @@ public class EasyLogger {
 
     public static void log(String message){
 
-        //Log.d(TAG, message);
+        Log.d(TAG, message);
     }
 
     public static void toast(Context context, String message){
        //  save(message, context);
-       //  log(message);
+        log(message);
         //Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
@@ -36,7 +36,6 @@ public class EasyLogger {
 
     String line = getDateNow() + ": " + message;
         SharedPreferences preferences =  context.getSharedPreferences("productactivations", Context.MODE_PRIVATE);
-
 
         SharedPreferences.Editor pref = preferences.edit();
         pref.putString("display", line);
