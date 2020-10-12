@@ -343,7 +343,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         }
 
         //cancel already displayed notification
-        if(!inRadius(closest, currentLocation)){
+        if(!inRadius(closest, currentLocation) && closest.id!=-1){
             if(alreadyInGeofence(closest)){
                 EasyLogger.toast(this, "Exited geofence " + closest.name);
                 SendNotification nm = new SendNotification(getApplicationContext(), null, this);
@@ -358,7 +358,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
         if(alreadyInGeofence(closest) && closest.id!=-1){
 
-            EasyLogger.toast(getApplicationContext(), "Already in geofence "+closest.id);
+            EasyLogger.toast(getApplicationContext(), "Already in geofence "+closest.id );
 
             //onNotificationNotSent();
            // finishJob();
