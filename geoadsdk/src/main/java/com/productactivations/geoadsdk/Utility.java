@@ -7,6 +7,8 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
@@ -28,6 +30,35 @@ public class Utility {
 
      //   EasyLogger.toast(context, "finished scheduling job");
     }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public static void scheduleLocationlessJob(Context context) {
+        ComponentName serviceComponent = new ComponentName(context, LocationLessService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+        builder.setMinimumLatency(1000*60 * 1); // wait at least
+        builder.setOverrideDeadline(1000 * 60 * 3); // maximum delay
+        //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
+        //builder.setRequiresDeviceIdle(true); // device should be idle
+        //builder.setRequiresCharging(false); // we don't care if the device is charging or not
+        JobScheduler jobScheduler = null;
+        jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        jobScheduler.schedule(builder.build());
+
+        //   EasyLogger.toast(context, "finished scheduling job");
+    }
+
+    public static Boolean locationEnabled(Context context){
+        LocationManager lm = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        return gps_enabled;
+    }
+
 
 
     public static void scheduleAlarm(Context context){

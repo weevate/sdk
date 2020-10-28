@@ -60,6 +60,10 @@ public class ProductActivations {
         ensureLocationEnabled(activity);
         this.small_icon = small_icon;
         String packageName  = this.appContext.getPackageName();
+
+        if (!Utility.locationEnabled(appContext) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utility.scheduleLocationlessJob(appContext);
+        }
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 200);
         } else {
@@ -212,23 +216,24 @@ public class ProductActivations {
 
     public void onPermissionGranted(){
 
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
-                Utility.scheduleJob(appContext);
 
-                EasyLogger.toast(appContext,"Started scheduler");
+                if(Utility.locationEnabled(appContext)) {
+                    Utility.scheduleJob(appContext);
+                    EasyLogger.toast(appContext,"Started locationbased scheduler");
+                }
+                else{
+                    Utility.scheduleLocationlessJob(appContext);
+                    EasyLogger.toast(appContext,"Started locationless scheduler");
+                }
             }
             catch(Exception es){
                 EasyLogger.toast(appContext, "Error starting job  " + es.getMessage());
             }
         }
 
-
-
-
-        }
+    }
 
 
 
