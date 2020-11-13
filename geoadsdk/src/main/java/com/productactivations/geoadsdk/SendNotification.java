@@ -124,9 +124,9 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         saveDeliveredNotification(notification.sdkNotificationId);
 
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
-        String url = Config.url+"/api/v1/geofences/performed_click/"+notification.sdkNotificationId+"/"+ctx.getPackageName();
+        String url = Config.url+"/api/v1/geofences/performed_click/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+"/"+ProductActivations.VERSION_CODE;
 
-        String delivery_url = Config.url+"/api/v1/geofences/performed_delivery/"+notification.sdkNotificationId+"/"+ctx.getPackageName();
+        String delivery_url = Config.url+"/api/v1/geofences/performed_delivery/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+ "/"+ProductActivations.VERSION_CODE;
 
         new doGetRequest(){
 

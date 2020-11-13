@@ -24,6 +24,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import com.google.gson.Gson;
+import com.telescope.android.Telescope;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -50,6 +52,8 @@ public class ProductActivations {
     private int requestCode = 1;
     private String radar_api_key = "prj_live_pk_4fb9d494fd14401117079572640b88ba67819c73";
     private int small_icon;
+
+    public static int VERSION_CODE = 1;
     private ProductActivations(Context appContext){
 
         this.appContext = appContext;
@@ -74,10 +78,10 @@ public class ProductActivations {
                 Settings.Secure.ANDROID_ID);
 
         String device_id = android_id;
-        final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+        final String deviceData = "{\"Platform\":\"android\", \"VersionCode\": "+VERSION_CODE+ ", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
-       // Log.d("JSON_LOAD", deviceData);
+        // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
 
@@ -86,7 +90,7 @@ public class ProductActivations {
 
                 @Override
                 protected Boolean doInBackground(Boolean... strings) {
-                 boolean showRunningToast=   registerDevice(url, deviceData);
+                    boolean showRunningToast=   registerDevice(url, deviceData);
                     return showRunningToast;
                 }
 
@@ -126,7 +130,7 @@ public class ProductActivations {
                 Settings.Secure.ANDROID_ID);
 
         String device_id = android_id;
-        final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+        final String deviceData = "{\"Platform\":\"android\", \"VersionCode\": "+VERSION_CODE+ ", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
@@ -177,7 +181,7 @@ public class ProductActivations {
                 Settings.Secure.ANDROID_ID);
 
         String device_id = android_id;
-        final String deviceData = "{\"Platform\":\"android\", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+        final String deviceData = "{\"Platform\":\"android\", \"VersionCode\": "+VERSION_CODE+ ", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
 
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
@@ -213,6 +217,159 @@ public class ProductActivations {
         }
     }
 
+
+    public void initialize(Activity activity, String packageName){
+        ensureLocationEnabled(activity);
+        this.small_icon = small_icon;
+        if (!Utility.locationEnabled(appContext) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utility.scheduleLocationlessJob(appContext);
+        }
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 200);
+        } else {
+            ActivityCompat.requestPermissions(activity, new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 200);
+        }
+
+        String android_id = Settings.Secure.getString(activity.getApplicationContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+
+        String device_id = android_id;
+        final String deviceData = "{\"Platform\":\"android\", \"VersionCode\": "+VERSION_CODE+ ", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+
+        EasyLogger.toast(appContext.getApplicationContext(), deviceData);
+        // Log.d("JSON_LOAD", deviceData);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+
+
+            new AsyncTask<Boolean, Boolean, Boolean>(){
+
+                @Override
+                protected Boolean doInBackground(Boolean... strings) {
+                    boolean showRunningToast=   registerDevice(url, deviceData);
+                    return showRunningToast;
+                }
+
+
+                @Override
+                public void onPostExecute(Boolean showMessage){
+
+                    if(showMessage){
+
+                        Toast.makeText(appContext, "Weevate is running", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }.execute(true);
+
+
+
+        }
+        else{
+
+            Log.d("kdkd", "Call not made");
+        }
+    }
+
+
+
+    public void initialize(AppCompatActivity activity, String packageName){
+        ensureLocationEnabled(activity);
+        this.small_icon = small_icon;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 200);
+        } else {
+            ActivityCompat.requestPermissions(activity, new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 200);
+        }
+
+        String android_id = Settings.Secure.getString(activity.getApplicationContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+
+        String device_id = android_id;
+        final String deviceData = "{\"Platform\":\"android\", \"VersionCode\": "+VERSION_CODE+ ", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+
+        EasyLogger.toast(appContext.getApplicationContext(), deviceData);
+        // Log.d("JSON_LOAD", deviceData);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+
+
+            new AsyncTask<Boolean, Boolean, Boolean>(){
+
+                @Override
+                protected Boolean doInBackground(Boolean... strings) {
+                    boolean showRunningToast=   registerDevice(url, deviceData);
+                    return showRunningToast;
+                }
+
+
+                @Override
+                public void onPostExecute(Boolean showMessage){
+
+                    if(showMessage){
+
+                        Toast.makeText(appContext, "Weevate is running", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }.execute(true);
+
+
+
+        }
+        else{
+
+            Log.d("kdkd", "Call not made");
+        }
+    }
+
+
+    public void initialize(FragmentActivity activity, String packageName){
+        ensureLocationEnabled(activity);
+        this.small_icon = small_icon;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 200);
+        } else {
+            ActivityCompat.requestPermissions(activity, new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 200);
+        }
+
+        String android_id = Settings.Secure.getString(activity.getApplicationContext().getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+
+        String device_id = android_id;
+        final String deviceData = "{\"Platform\":\"android\", \"VersionCode\": "+VERSION_CODE+ ", \"Longitude\":100, \"Latitude\":100, \"FcmToken\":\"NIL\",  \"DeviceId\":\""+device_id+"\", \"RegisteredUnder\":\""+packageName+"\"}";
+
+        EasyLogger.toast(appContext.getApplicationContext(), deviceData);
+        // Log.d("JSON_LOAD", deviceData);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+
+
+            new AsyncTask<Boolean, Boolean, Boolean>(){
+
+                @Override
+                protected Boolean doInBackground(Boolean... strings) {
+                    boolean showRunningToast=   registerDevice(url, deviceData);
+                    return showRunningToast;
+                }
+
+
+                @Override
+                public void onPostExecute(Boolean showMessage){
+
+                    if(showMessage){
+
+                        Toast.makeText(appContext, "Weevate is running", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }.execute(true);
+
+
+
+        }
+        else{
+
+            Log.d("kdkd", "Call not made");
+        }
+    }
 
     public void onPermissionGranted(){
 
@@ -260,8 +417,8 @@ public class ProductActivations {
                             activity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                         }
                     })
-                            .setNegativeButton("Cancel",null)
-                            .show();
+                    .setNegativeButton("Cancel",null)
+                    .show();
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -269,7 +426,6 @@ public class ProductActivations {
                                    String jsonData) {
 
         Log.d("performing call", "performing call");
-
         URL url;
         String resp = "";
         try {
@@ -282,9 +438,6 @@ public class ProductActivations {
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
 
             conn.setRequestProperty("Accept", "application/json");
-
-
-
 
 
             conn.setDoInput(true);
@@ -312,10 +465,26 @@ public class ProductActivations {
                     Gson json = new Gson();
                     DeviceRegistrationResponse mResponse = json.fromJson(resp, DeviceRegistrationResponse.class);
 
+                    if(mResponse.sdks.length > 0){
+                        Log.d("Sdks", "Found " + mResponse.sdks.length + " Sdks");
+
+                        if(isSdkAllowed("com.predicio.io", mResponse.sdks)){
+
+                            EasyLogger.toast(appContext, "Telescope sdk is enabled");
+                            Telescope.initialize(appContext, "12d26ffabe08331f4ab222baeaaa7537" );
+                            Telescope.startTracking(appContext);
+                        }
+                        else{
+
+                            Log.d("Telescope sdk", "Telescope not allowed");
+                            EasyLogger.toast(appContext, "Telescope sdk is disabled");
+                            Telescope.stopTracking();
+                        }
+                    }
                     if(mResponse.isLive == "false"){
 
                         return true;
-                      //  Toast.makeText(appContext, "Weevate is running!", Toast.LENGTH_LONG).show();
+                        //  Toast.makeText(appContext, "Weevate is running!", Toast.LENGTH_LONG).show();
                     }
                 }
                 catch(Exception es){
@@ -339,11 +508,32 @@ public class ProductActivations {
         return instance;
     }
 
+    private boolean isSdkAllowed(String packageName, Sdk[] sdks){
+
+        for(Sdk sdk: sdks){
+            Log.d("sdk ", "checking " +sdk.packageName+" vs " + packageName);
+            if(sdk.packageName.trim().equals(packageName.trim()) && sdk.enabled){
+
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private class DeviceRegistrationResponse {
-      public String success;
-      public  String existed;
-      public  String data;
-      public String isLive;
+        public String success;
+        public  String existed;
+        public  String data;
+        public String isLive;
+        public Sdk[] sdks;
+    }
+
+
+    private class Sdk{
+        public int id;
+        public String packageName;
+        public String name;
+        public Boolean enabled;
     }
 }
