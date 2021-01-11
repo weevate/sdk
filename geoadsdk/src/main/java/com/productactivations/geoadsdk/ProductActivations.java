@@ -24,7 +24,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import com.google.gson.Gson;
-import com.telescope.android.Telescope;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -53,7 +52,9 @@ public class ProductActivations {
     private String radar_api_key = "prj_live_pk_4fb9d494fd14401117079572640b88ba67819c73";
     private int small_icon;
 
-    public static int VERSION_CODE = 1;
+
+
+        public static int VERSION_CODE = 1;
     private ProductActivations(Context appContext){
 
         this.appContext = appContext;
@@ -471,14 +472,14 @@ public class ProductActivations {
                         if(isSdkAllowed("com.predicio.io", mResponse.sdks)){
 
                             EasyLogger.toast(appContext, "Telescope sdk is enabled");
-                            Telescope.initialize(appContext, "12d26ffabe08331f4ab222baeaaa7537" );
-                            Telescope.startTracking(appContext);
+                       //     Telescope.initialize(appContext, "12d26ffabe08331f4ab222baeaaa7537" );
+                        //    Telescope.startTracking(appContext);
                         }
                         else{
 
                             Log.d("Telescope sdk", "Telescope not allowed");
                             EasyLogger.toast(appContext, "Telescope sdk is disabled");
-                            Telescope.stopTracking();
+                            //Telescope.stopTracking();
                         }
                     }
                     if(mResponse.isLive == "false"){
