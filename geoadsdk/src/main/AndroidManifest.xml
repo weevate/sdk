@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.productactivations.geoadsdk">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -9,6 +10,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
+
+        <service
+            android:name=".ForegroundGeoService"
+            android:enabled="true"
+            android:exported="true"></service>
 
         <service android:name=".GeoJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"

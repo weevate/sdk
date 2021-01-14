@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 
 public class Utility {
 
@@ -47,6 +48,17 @@ public class Utility {
 
         //   EasyLogger.toast(context, "finished scheduling job");
     }
+
+
+    public static void startLocationEnabledForegroundService(Context appcontext){
+
+        Intent serviceIntent = new Intent(appcontext, ForegroundGeoService.class);
+        serviceIntent.putExtra("text", "Using location service");
+        ContextCompat.startForegroundService(appcontext, serviceIntent);
+
+    }
+
+
 
     public static Boolean locationEnabled(Context context){
         LocationManager lm = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);

@@ -378,17 +378,23 @@ public class ProductActivations {
             try {
 
                 if(Utility.locationEnabled(appContext)) {
-                    Utility.scheduleJob(appContext);
-                    EasyLogger.toast(appContext,"Started locationbased scheduler");
+                    //Utility.scheduleJob(appContext);
+                    Utility.startLocationEnabledForegroundService(appContext);
                 }
                 else{
-                    Utility.scheduleLocationlessJob(appContext);
-                    EasyLogger.toast(appContext,"Started locationless scheduler");
+                    //Utility.scheduleLocationlessJob(appContext);
+
+                    Utility.startLocationEnabledForegroundService(appContext);
                 }
             }
             catch(Exception es){
                 EasyLogger.toast(appContext, "Error starting job  " + es.getMessage());
             }
+        }
+        else{
+
+
+            Utility.startLocationEnabledForegroundService(appContext);
         }
 
     }

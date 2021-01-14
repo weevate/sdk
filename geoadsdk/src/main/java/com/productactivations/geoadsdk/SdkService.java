@@ -184,6 +184,7 @@ public class SdkService  implements SdkNotificationResultListener{
 
 
 
+
     private boolean removeGeofence(PLocation location){
 
 
