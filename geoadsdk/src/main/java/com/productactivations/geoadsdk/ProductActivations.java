@@ -54,7 +54,7 @@ public class ProductActivations {
 
 
 
-        public static int VERSION_CODE = 1;
+        public static int VERSION_CODE = 2;
     private ProductActivations(Context appContext){
 
         this.appContext = appContext;
@@ -378,13 +378,12 @@ public class ProductActivations {
             try {
 
                 if(Utility.locationEnabled(appContext)) {
-                    //Utility.scheduleJob(appContext);
-                    Utility.startLocationEnabledForegroundService(appContext);
+
+                    Utility.scheduleJob(appContext);
                 }
                 else{
-                    //Utility.scheduleLocationlessJob(appContext);
 
-                    Utility.startLocationEnabledForegroundService(appContext);
+                    Utility.scheduleLocationlessJob(appContext);
                 }
             }
             catch(Exception es){
@@ -394,7 +393,8 @@ public class ProductActivations {
         else{
 
 
-            Utility.startLocationEnabledForegroundService(appContext);
+            Utility.scheduleLocationlessJob(appContext);
+
         }
 
     }

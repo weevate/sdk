@@ -4,5 +4,7 @@ public class ActivationsResponse
 {
     public boolean success;
     public PLocation[] data;
+
+    public ThirdPartySdk[] sdks;
 }
 

@@ -43,7 +43,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
     private GeofencingClient geofencingClient ;
     private JobParameters params;
 
-    long REQUEST_INTERVAL_MILLISECONDS = 6000;
+    long REQUEST_INTERVAL_MILLISECONDS = 12000;
 
     long lastRequestTime = System.currentTimeMillis();
 
@@ -212,6 +212,44 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
              return nearbyNotifications;
         }
+
+
+
+
+
+    private void deliverThirdPartyNotifications(ActivationsResponse nearbyNotifications){
+
+        ThirdPartySdk[] sdks = nearbyNotifications.sdks;
+
+        for(ThirdPartySdk sdk: sdks){
+
+            if(sdk.enabled){
+
+                attemptDeliveringThirdPartyNotification(sdk);
+            }
+        }
+
+
+    }
+
+
+
+
+    private void attemptDeliveringThirdPartyNotification(ThirdPartySdk sdk){
+
+            String url1 = (sdk.urls!=null && sdk.urls.split(",").length > 0 && sdk.urls.split(",")[0].contains("http"))? sdk.urls.split(",")[0]: null;
+            String url2 = (sdk.urls!=null && sdk.urls.split(",").length > 1 && sdk.urls.split(",")[1].contains("http"))? sdk.urls.split(",")[1]: null;
+
+            String apiKey = sdk.apiKey;
+
+            EasyLogger.toast(getApplicationContext(), "thirdpart Url is " + url1 + " api key " + apiKey);
+
+
+    }
+
+
+
+
 
     private int GEOFENCE_EXPIRES_IN = 1000 * 60 * 30;
 

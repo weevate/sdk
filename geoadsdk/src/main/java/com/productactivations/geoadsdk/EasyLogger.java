@@ -34,7 +34,7 @@ public class EasyLogger {
 
     public static void saveForViewing(Context context, String message){
 
-    String line = getDateNow() + ": " + message;
+        String line = getDateNow() + ": " + message;
         SharedPreferences preferences =  context.getSharedPreferences("productactivations", Context.MODE_PRIVATE);
 
         SharedPreferences.Editor pref = preferences.edit();
