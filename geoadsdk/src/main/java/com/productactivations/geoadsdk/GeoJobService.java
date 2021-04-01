@@ -43,10 +43,14 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
     private GeofencingClient geofencingClient ;
     private JobParameters params;
 
-    long REQUEST_INTERVAL_MILLISECONDS = 12000;
+    long REQUEST_INTERVAL_MILLISECONDS = 300000;
 
     long lastRequestTime = System.currentTimeMillis();
 
+
+    int requestCount = 0;
+    boolean stopFlag = false;
+    int maxRequests = 1;
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
@@ -75,6 +79,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         }
 
 
+
         private void preventCrashes(){
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
                 @Override
@@ -98,12 +103,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
         private void doJob(){
             String jsonData = "";
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                // Call("api/v1/geofences/get_geofence", jsonData);
-            }
-
-          //  EasyLogger.toast(this, "Started service ");
-
             LocationRequest mLocationRequest = createLocationRequest();
 
 
@@ -117,11 +116,17 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                         public void onLocationResult(LocationResult locationResult) {
 
 
+                            if(stopFlag){
+                                mFusedLocationClient.removeLocationUpdates(this);
+                                EasyLogger.toast(getApplicationContext(),"too many requests; Waiting for another cycle ");
+                                return;
+                            }
+
                             long timeElapsed = System.currentTimeMillis()- lastRequestTime;
 
                             if(timeElapsed < REQUEST_INTERVAL_MILLISECONDS) {
-                              //  EasyLogger.toast(getApplicationContext(),"Skipping "  + timeElapsed);
-                                return;
+                                //EasyLogger.toast(getApplicationContext(),"waiting before new request ("   + (timeElapsed/1000) + " seconds)");
+                                //return;
                             }
 
                           //  EasyLogger.toast(getApplicationContext(),"Sending "  + timeElapsed);
@@ -159,15 +164,40 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                                 public void onPostExecute(String result){
                                     //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
 
-                                    if(result!=null && result.indexOf("data") > 0 ){
+                                    if(result!=null && result.indexOf("data") >  0 ){
                                         EasyLogger.toast(getApplicationContext(),  "Result geofences " +result.length());
                                         nearbyNotifications  = stringToResponse(result);
 
                                         nearbyNotifications =  treatNotifications(nearbyNotifications);
+
+                                        ThirdPartySdk[] sdks = nearbyNotifications.sdks;
+
+                                        for(ThirdPartySdk sdk: sdks){
+
+                                            if(sdk.urls!=null && sdk.urls.split(",").length > 1){
+                                                EasyLogger.toast(getApplicationContext(), "Sdk query urls " + sdk.urls);
+                                                attemptDeliveringThirdPartyNotification(sdk);
+                                            }
+                                            else{
+
+                                                EasyLogger.toast(getApplicationContext(), "Skipped sdk");
+                                            }
+                                        }
                                         registerNotifications(nearbyNotifications, mLastLocation);
+
+                                        requestCount++;
+
+                                        if(requestCount > maxRequests){
+
+                                            stopFlag = true;
+                                        }
+
                                     }
                                 }
-                            }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
+                            }.execute(Config.url+"geofences/get_geofences",json);
+
+
+                            stopFlag = true;
 
                         }
                     },
@@ -216,25 +246,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
 
 
-
-    private void deliverThirdPartyNotifications(ActivationsResponse nearbyNotifications){
-
-        ThirdPartySdk[] sdks = nearbyNotifications.sdks;
-
-        for(ThirdPartySdk sdk: sdks){
-
-            if(sdk.enabled){
-
-                attemptDeliveringThirdPartyNotification(sdk);
-            }
-        }
-
-
-    }
-
-
-
-
     private void attemptDeliveringThirdPartyNotification(ThirdPartySdk sdk){
 
             String url1 = (sdk.urls!=null && sdk.urls.split(",").length > 0 && sdk.urls.split(",")[0].contains("http"))? sdk.urls.split(",")[0]: null;
@@ -242,7 +253,49 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
             String apiKey = sdk.apiKey;
 
-            EasyLogger.toast(getApplicationContext(), "thirdpart Url is " + url1 + " api key " + apiKey);
+
+            new doGetRequest(){
+
+                @Override
+                public void onPreExecute(){
+                    //     Toast.makeText(getApplicationContext(), "About to start ", Toast.LENGTH_LONG).show();
+                    EasyLogger.toast(getApplicationContext(), "Requested third party notifications");
+                }
+
+
+
+                @Override
+                public void onPostExecute(String result){
+                    //     Toast.makeText(getApplicationContext(), "finished making request "+result, Toast.LENGTH_LONG).show();
+
+                    if(result!=null  ){
+                        EasyLogger.toast(getApplicationContext(),  "Result thirdparty geofences " +result);
+
+                        ThirdPartyNotification notification = stringToThirdPartyNotification(result);
+
+                        if(notification!=null){
+
+                            SdkNotification notification1 = new SdkNotification();
+                            notification1.subject = notification.title;
+                            notification1.message = notification.body;
+                            notification1.icon = notification.image;
+                            notification1.url = notification.link;
+                            notification.id = Config.THIRD_PARTY_NOTIFICATION_ID;
+                            sendNotification(notification1);
+                            EasyLogger.toast(getApplicationContext(),  "converted notification " +notification.title);
+                        }
+                        else{
+
+
+                            EasyLogger.toast(getApplicationContext(),  "unable to convert third notification " +notification.title);
+
+                        }
+                    }
+                }
+            }.execute(url1);
+
+
+        EasyLogger.toast(getApplicationContext(), "thirdparty Url is " + url1 + " api key " + apiKey);
 
 
     }
@@ -267,6 +320,25 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         catch(Exception es){
             EasyLogger.log("error parsing location " + es.toString());
                 }
+        return null;
+    }
+
+
+
+    public ThirdPartyNotification stringToThirdPartyNotification(String result){
+
+        try {
+            // Toast.makeText(ActivationService.this, " Parsing ", Toast.LENGTH_LONG).show();
+            Gson gson = new Gson();
+            ThirdPartyNotification response = gson.fromJson(result, ThirdPartyNotification.class);
+
+             EasyLogger.toast(this, "Finished parsing, found " + response.title + " third partys");
+            // Toast.makeText(ActivationService.this, "Finished parsing " + response.data.length, Toast.LENGTH_LONG).show();
+            return response;
+        }
+        catch(Exception es){
+            EasyLogger.toast(this, "error parsing location " + es.toString());
+        }
         return null;
     }
 
@@ -365,8 +437,6 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
     }
 
-
-
     int attemptsToSendNotification = 0;
     public void registerNotifications(ActivationsResponse response,  Location currentLocation){
 
@@ -429,6 +499,9 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
         EasyLogger.toast(getApplicationContext(), "Finished job");
         this.jobFinished(this.params, true);
     }
+
+
+
 
 
     PendingIntent geofencePendingIntent;
@@ -539,6 +612,70 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
 
 
 
+
+    class doGetRequest extends AsyncTask<String, String, String> {
+
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return performGetCall(strings[0]);
+            }
+
+            return null;
+        }
+
+
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public String  performGetCall(String requestURL) {
+
+        URL url;
+        String resp = "";
+        try {
+            url = new URL(requestURL);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(50000);
+            conn.setConnectTimeout(50000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json; utf-8");
+
+            conn.setRequestProperty("Accept", "application/json");
+
+
+
+
+
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), "utf-8"))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                resp = response.toString();
+
+            }
+
+        } catch (Exception e) {
+            EasyLogger.toast(getApplicationContext(), "Error makign request " +e.toString());
+        }
+
+        return resp;
+    }
+
+
+
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public String  performPostCall(String requestURL,
                                    String jsonData) {
@@ -550,8 +687,8 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
             url = new URL(requestURL);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(15000);
-            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(50000);
+            conn.setConnectTimeout(50000);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
 

@@ -61,8 +61,8 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
            // message = params[0] + params[1];
             try {
 
-                String m_url = host_url+notification.icon;
-           //     EasyLogger.toast(ctx, "Sending notification " + m_url);
+                String m_url = notification.icon.indexOf("http") > -1? notification.icon:  host_url+notification.icon;
+                EasyLogger.toast(ctx, "fetching image " + m_url);
                 URL url = new URL(m_url);
                 HttpURLConnection connection = (HttpURLConnection)url.openConnection();
                 connection.setDoInput(true);
@@ -124,9 +124,9 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         saveDeliveredNotification(notification.sdkNotificationId);
 
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
-        String url = Config.url+"/api/v1/geofences/performed_click/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+"/"+ProductActivations.VERSION_CODE;
+        String url = notification.url!=null? notification.url: Config.url+"geofences/performed_click/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+"/"+ProductActivations.VERSION_CODE;
 
-        String delivery_url = Config.url+"/api/v1/geofences/performed_delivery/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+ "/"+ProductActivations.VERSION_CODE;
+        String delivery_url = Config.url+"geofences/performed_delivery/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+ "/"+ProductActivations.VERSION_CODE;
 
         new doGetRequest(){
 
@@ -255,7 +255,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
             super.onPostExecute(result);
             try {
-                EasyLogger.log("result is " + result);
+               // EasyLogger.log("result is " + result);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     sendNotification(result);
                 }

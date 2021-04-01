@@ -382,7 +382,6 @@ public class ProductActivations {
                     Utility.scheduleJob(appContext);
                 }
                 else{
-
                     Utility.scheduleLocationlessJob(appContext);
                 }
             }
