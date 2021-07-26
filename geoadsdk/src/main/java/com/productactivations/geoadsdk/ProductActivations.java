@@ -84,7 +84,7 @@ public class ProductActivations {
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+            final  String url =Config.url+"/geofences/register_device";
 
 
             new AsyncTask<Boolean, Boolean, Boolean>(){
@@ -136,7 +136,7 @@ public class ProductActivations {
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+            final  String url =Config.url+"/geofences/register_device";
 
 
             new AsyncTask<Boolean, Boolean, Boolean>(){
@@ -187,7 +187,7 @@ public class ProductActivations {
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+            final  String url =Config.url+"/geofences/register_device";
 
 
             new AsyncTask<Boolean, Boolean, Boolean>(){
@@ -240,7 +240,7 @@ public class ProductActivations {
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+            final  String url =Config.url+"/geofences/register_device";
 
 
             new AsyncTask<Boolean, Boolean, Boolean>(){
@@ -291,7 +291,7 @@ public class ProductActivations {
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+            final  String url =Config.url+"/geofences/register_device";
 
 
             new AsyncTask<Boolean, Boolean, Boolean>(){
@@ -341,7 +341,7 @@ public class ProductActivations {
         EasyLogger.toast(appContext.getApplicationContext(), deviceData);
         // Log.d("JSON_LOAD", deviceData);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final  String url ="https://api.productactivations.com/api/v1/geofences/register_device";
+            final  String url =Config.url+"/geofences/register_device";
 
 
             new AsyncTask<Boolean, Boolean, Boolean>(){

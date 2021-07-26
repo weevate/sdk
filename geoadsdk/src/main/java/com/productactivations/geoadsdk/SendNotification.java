@@ -53,7 +53,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
 
         }
 
-        String host_url = "https://app.weevate.com/";
+        String host_url = Config.url;
         @Override
         protected Bitmap doInBackground(String... params) {
 
@@ -85,7 +85,7 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
     private void savePendingUrlToPreferences(){
         SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
         SharedPreferences.Editor editPrefs = prefs.edit();
-        editPrefs.putInt("pending_notification_id", notification.sdkNotificationId);
+        editPrefs.putInt("pending_notification_id", notification.id);
         editPrefs.putString("pending_package_name", ctx.getPackageName());
         editPrefs.commit();
     }
@@ -112,21 +112,30 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void sendNotification(Bitmap largeIcon){
 
-        if(hasNotBeenDeliveredToday(notification.sdkNotificationId)){
+        if(hasNotBeenDeliveredToday(notification.id)){
 
-            EasyLogger.toast(ctx, "Cancellilng delivery");
+            EasyLogger.toast(ctx, "Cancellilng delivery this note was delivered recently");
+            service.onNotificationNotSent();
+            return;
+        }
+
+        if(!shouldWeDeliverThisNoteNow()){
+
+
+            EasyLogger.toast(ctx, "Cancellilng delivery: not upto an hour since last delivery");
             service.onNotificationNotSent();
             return;
         }
 
         EasyLogger.toast(ctx, "Not cancelling notification");
 
-        saveDeliveredNotification(notification.sdkNotificationId);
+        saveDeliveredNotification(notification.id);
+        saveLastDeliveryTime();
 
         //Intent notificationIntent = new Intent(ctx, WebViewActivity.class);
-        String url = notification.url!=null? notification.url: Config.url+"geofences/performed_click/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+"/"+ProductActivations.VERSION_CODE;
+        String url = notification.url!=null? notification.url: Config.url+"geofences/performed_click/"+notification.id+"/"+ctx.getPackageName()+"/"+ProductActivations.VERSION_CODE;
 
-        String delivery_url = Config.url+"geofences/performed_delivery/"+notification.sdkNotificationId+"/"+ctx.getPackageName()+ "/"+ProductActivations.VERSION_CODE;
+        String delivery_url = Config.url+"geofences/performed_delivery/"+notification.id+"/"+ctx.getPackageName()+ "/"+ProductActivations.VERSION_CODE;
 
         new doGetRequest(){
 
@@ -199,6 +208,57 @@ public class SendNotification  extends AsyncTask<String, Void, Bitmap> {
         editPrefs.commit();
     }
 
+    //save the time this notification was displayed to avoid displaying again till a day has passed
+    public void saveLastDeliveryTime(){
+
+        SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editPrefs = prefs.edit();
+        String key = Config.DELIVERY_TIME_KEY;
+        String value = "t"+System.currentTimeMillis();
+
+        EasyLogger.toast(ctx, "Saving " + key + " with value  as delivered. Will not deliver again till 1 hrs");
+        editPrefs.putString(key, value);
+        editPrefs.commit();
+    }
+
+
+
+
+    private boolean shouldWeDeliverThisNoteNow(){
+
+        SharedPreferences prefs  = ctx.getSharedPreferences("geofences", Context.MODE_PRIVATE);
+
+        String key = Config.DELIVERY_TIME_KEY;
+        String last_note_delivery_time = prefs.getString(key, null);
+
+        EasyLogger.toast(ctx, "Checking " + key + "  found " + last_note_delivery_time);
+
+        if(last_note_delivery_time == null) {
+
+            EasyLogger.toast(ctx, "checking if its too early to deliver note: NO previous record of note found");
+            return true;
+        }
+
+        long timeDelivered = Long.valueOf(last_note_delivery_time.replace("t", ""));
+
+        EasyLogger.toast(ctx, "Long value  " + timeDelivered);
+        long currentTime = System.currentTimeMillis();
+        long timeElapsed = currentTime - timeDelivered;
+
+        EasyLogger.toast(ctx, "Time passed in millis " + timeElapsed);
+
+        int hoursPassed = (int) (((timeElapsed/1000)/60)/60);
+
+        //int minutesPassed  = (int) (((timeElapsed/1000)));
+
+
+        boolean shouldDeliver = hoursPassed > 0;
+
+        EasyLogger.toast(ctx, "hours passed since last notification was delivered " + hoursPassed);
+
+        //EasyLogger.toast(ctx, "Has note been delivered today? " + String.valueOf(hasBeenDelivered));
+        return shouldDeliver;
+    }
 
     //save the time this notification was displayed to avoid displaying again till a day has passed
     private boolean hasNotBeenDeliveredToday(int not_id){

@@ -116,8 +116,9 @@ public class SdkService  implements SdkNotificationResultListener{
                                     nearbyNotifications  = stringToResponse(result);
                                     registerNotifications(nearbyNotifications, mLastLocation);
                                 }
+
                             }
-                        }.execute("https://api.productactivations.com/api/v1/geofences/get_geofences",json);
+                        }.execute(Config.url+"geofences/get_geofences",json);
 
                     }
                 },

@@ -286,8 +286,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
                         }
                         else{
 
-
-                            EasyLogger.toast(getApplicationContext(),  "unable to convert third notification " +notification.title);
+                            EasyLogger.toast(getApplicationContext(),  "unable to convert third party notification ");
 
                         }
                     }
@@ -691,11 +690,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
             conn.setConnectTimeout(50000);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; utf-8");
-
             conn.setRequestProperty("Accept", "application/json");
-
-
-
 
 
             conn.setDoInput(true);
@@ -723,7 +718,7 @@ public class GeoJobService extends JobService implements SdkNotificationResultLi
             }
 
         } catch (Exception e) {
-            EasyLogger.toast(getApplicationContext(), "Error makign request " +e.toString());
+            EasyLogger.toast(getApplicationContext(), "Error makign request " +e.toString() + " " + e.getLocalizedMessage() + " " + e.getStackTrace());
         }
 
         return resp;
