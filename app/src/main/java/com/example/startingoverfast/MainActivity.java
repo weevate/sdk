@@ -19,6 +19,8 @@ import com.productactivations.geoadsdk.ActivationsResponse;
 import com.productactivations.geoadsdk.DelayedLogger;
 import com.productactivations.geoadsdk.EasyLogger;
 import com.productactivations.geoadsdk.ProductActivations;
+import com.productactivations.geoadsdk.Products;
+import com.productactivations.geoadsdk.ProductsViewMode;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -48,6 +50,17 @@ public class MainActivity extends AppCompatActivity {
 
         return locationRequest;
     }
+
+
+    public void launchProducts(View view){
+
+        Products products = new Products();
+        products.autoLogin("larisoftnig206@hotmail.com", ProductsViewMode.OUT_APP);
+        products.launchProductsView(getApplicationContext());
+
+    }
+
+
 
     int countAction = 0;
     int count = 0;

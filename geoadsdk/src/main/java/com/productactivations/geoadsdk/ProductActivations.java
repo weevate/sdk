@@ -54,12 +54,13 @@ public class ProductActivations {
 
 
 
-        public static int VERSION_CODE = 2;
+    public static int VERSION_CODE = 2;
     private ProductActivations(Context appContext){
 
         this.appContext = appContext;
 
     }
+
 
     public void initialize(Activity activity){
         ensureLocationEnabled(activity);

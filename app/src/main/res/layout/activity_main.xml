@@ -34,6 +34,13 @@
                 android:onClick="clearLogs"/>
 
 
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Launch Products"
+                android:onClick="launchProducts"/>
+
+
             <TextView
                 android:id="@+id/coordinate"
                 android:text="loading coordinate"
