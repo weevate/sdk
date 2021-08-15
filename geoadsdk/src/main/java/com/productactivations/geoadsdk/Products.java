@@ -27,12 +27,18 @@ public class Products {
         }
     }
 
+    public String getAuthenticatedProductUrl(){
+        String url = Config.products_url + Config.plugin_login_url + "?e="+user_email+"&auth="+this.getAuthCode();
+        return url;
+    }
+
 
     private String getAuthCode(){
 
        return "amcirujwpwqq1111349fkifklvmnvbfn2727j202838a";
 
     }
+
 
 
 

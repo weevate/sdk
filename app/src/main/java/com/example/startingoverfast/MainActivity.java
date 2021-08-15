@@ -61,6 +61,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void launchProductsBrowser(View view){
+
+        Products products = new Products();
+        products.autoLogin("larisoftnig206@hotmail.com", ProductsViewMode.IN_APP);
+        Toast.makeText(getApplicationContext(), "Open url: " + products.getAuthenticatedProductUrl()  + " In your webview", Toast.LENGTH_LONG).show();
+
+    }
+
 
     int countAction = 0;
     int count = 0;

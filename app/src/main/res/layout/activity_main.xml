@@ -41,6 +41,13 @@
                 android:onClick="launchProducts"/>
 
 
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Launch Products In App"
+                android:onClick="launchProductsBrowser"/>
+
+
             <TextView
                 android:id="@+id/coordinate"
                 android:text="loading coordinate"
@@ -64,6 +71,10 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_weight="1.0"/>
+
+
+
+
 
         </LinearLayout>
 
