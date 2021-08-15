@@ -39,9 +39,6 @@ public class Products {
 
     }
 
-
-
-
     public void launchProductsViewInOutBrowser(Context context){
 
         String url = Config.products_url + Config.plugin_login_url + "?e="+user_email+"&auth="+this.getAuthCode();
